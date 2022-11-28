@@ -1,19 +1,32 @@
 ##LIBRETRO
-DEBUG=0
-USE_ZLIB   = 1
-USE_TREMOR = 0
-USE_VORBIS = 1
-USE_FLAC   = 1
-USE_MAD    = 1
-USE_FAAD   = 1
-USE_PNG    = 1
-USE_JPEG   = 1
-USE_THEORADEC=1
-USE_FREETYPE2=1
-HAVE_MT32EMU=1
-USE_FLUIDSYNTH=1
-USE_LUA    = 1
-USE_LIBCO  = 1
+DEBUG          = 0
+USE_ZLIB       = 1
+USE_TREMOR     = 0
+USE_VORBIS     = 1
+USE_FLAC       = 1
+USE_MAD        = 1
+USE_FAAD       = 1
+USE_PNG        = 1
+USE_JPEG       = 1
+USE_THEORADEC  = 1
+USE_FREETYPE2  = 1
+HAVE_MT32EMU   = 1
+USE_FLUIDSYNTH = 1
+USE_LUA        = 1
+USE_LIBCO      = 1
+LOAD_RULES_MK  = 1
+USE_TINYGL     = 1
+USE_BINK       = 1
+NO_HIGH_DEF    = 0
+LITE           = 0
+ifndef NO_WIP
+   NO_WIP      = 0
+endif
+
+##SCUMM VM
+CORE_DIR = ../../../..
+srcdir   = $(CORE_DIR)
+VPATH    = $(CORE_DIR)
 
 HIDE := @
 SPACE :=
@@ -61,6 +74,8 @@ ifeq ($(shell uname -m), x86_64)
    BUILD_64BIT = 1
 else ifeq ($(shell uname -m), arm64)
    BUILD_64BIT = 1
+else ifeq ($(shell uname -m), aarch64)
+   BUILD_64BIT = 1
 else
    BUILD_64BIT = 0
 endif
@@ -69,42 +84,24 @@ endif
 LD        = $(CXX)
 AR        = ar cru
 RANLIB    = ranlib
+LS        = ls
 
 ifeq ($(platform), unix)
    TARGET  := $(TARGET_NAME)_libretro.so
    DEFINES += -fPIC
    LDFLAGS += -shared -Wl,--version-script=../link.T -fPIC
    TARGET_64BIT := $(BUILD_64BIT)
-
-# Raspberry Pi 3 (64 bit)
-else ifeq ($(platform), rpi3_64)
-   TARGET = $(TARGET_NAME)_libretro.so
-   DEFINES += -fPIC
-   CFLAGS += -fPIC
-   LDFLAGS += -shared -Wl,--version-script=../link.T -fPIC
-   CFLAGS += -mcpu=cortex-a53 -mtune=cortex-a53
-   CFLAGS += -fomit-frame-pointer -ffast-math
-   CXXFLAGS = $(CFLAGS) -frtti
-   BUILD_64BIT = 1
-
-# Raspberry Pi 4 (64 bit)
-else ifeq ($(platform), rpi4_64)
-   TARGET = $(TARGET_NAME)_libretro.so
-   DEFINES += -fPIC
-   CFLAGS += -fPIC
-   LDFLAGS += -shared -Wl,--version-script=../link.T -fPIC
-   CFLAGS += -mcpu=cortex-a72 -mtune=cortex-a72
-   CFLAGS += -fomit-frame-pointer -ffast-math
-   CXXFLAGS = $(CFLAGS) -frtti
-   BUILD_64BIT = 1
-
+   CXXFLAGS := -std=c++11
+   DEFINES += -DUSE_CXX11
 # OS X
 else ifeq ($(platform), osx)
    TARGET  := $(TARGET_NAME)_libretro.dylib
-   DEFINES += -fPIC
+   DEFINES += -fPIC -Wno-undefined-var-template -Wno-pragma-pack
    LDFLAGS += -dynamiclib -fPIC
    DEFINES += -DHAVE_POSIX_MEMALIGN=1
    TARGET_64BIT := $(BUILD_64BIT)
+   CXXFLAGS := -std=c++11
+   DEFINES += -DUSE_CXX11
 
    ifeq ($(CROSS_COMPILE),1)
 	TARGET_RULE   = -target $(LIBRETRO_APPLE_PLATFORM) -isysroot $(LIBRETRO_APPLE_ISYSROOT)
@@ -275,23 +272,16 @@ else ifeq ($(platform), gcw0)
    HAVE_MT32EMU = 0
    NO_HIGH_DEF := 1
 
-# MIYOO
-else ifeq ($(platform), miyoo)
+# Raspberry Pi 4
+else ifneq (,$(findstring rpi4,$(platform)))
    TARGET := $(TARGET_NAME)_libretro.so
-   CC = /opt/miyoo/usr/bin/arm-linux-gcc
-   CXX = /opt/miyoo/usr/bin/arm-linux-g++
-   LD = /opt/miyoo/usr/bin/arm-linux-g++
-   AR = /opt/miyoo/usr/bin/arm-linux-ar cru
-   RANLIB = /opt/miyoo/usr/bin/arm-linux-ranlib
-   DEFINES += -DDINGUX -fomit-frame-pointer -ffast-math -march=armv5te -mtune=arm926ej-s -fPIC
-   DEFINES += -ffunction-sections -fdata-sections
-   LDFLAGS += -shared -Wl,--gc-sections -Wl,--version-script=../link.T -fPIC
-   USE_VORBIS = 0
-   USE_THEORADEC = 0
-   USE_TREMOR = 1
-   USE_LIBCO  = 0
-   HAVE_MT32EMU = 0
-   NO_HIGH_DEF := 1
+   TARGET_64BIT := $(BUILD_64BIT)
+   DEFINES += -fPIC -Wno-multichar -D_ARM_ASSEM_
+   LDFLAGS += -shared -Wl,--version-script=../link.T -fPIC
+   DEFINES += -mcpu=cortex-a72
+   CXXFLAGS := -std=c++11
+   DEFINES += -DUSE_CXX11
+   DEFINES += -DARM
 
 else ifeq ($(platform), android-armv7)
    TARGET  := $(TARGET_NAME)_libretro_android.so
@@ -310,6 +300,8 @@ else ifneq (,$(findstring armv,$(platform)))
    USE_THEORADEC = 0
    USE_TREMOR = 1
    HAVE_MT32EMU = 0
+   CXXFLAGS := -std=c++11
+   DEFINES += -DUSE_CXX11
 ifneq (,$(findstring cortexa8,$(platform)))
    DEFINES += -marm -mcpu=cortex-a8
 else ifneq (,$(findstring cortexa9,$(platform)))
@@ -325,6 +317,18 @@ ifneq (,$(findstring softfloat,$(platform)))
 else ifneq (,$(findstring hardfloat,$(platform)))
    DEFINES += -mfloat-abi=hard
 endif
+   DEFINES += -DARM
+# Odroid Go Advance
+else ifneq (,$(findstring oga_a35_neon_hardfloat,$(platform)))
+   TARGET := $(TARGET_NAME)_libretro.so
+   DEFINES += -fPIC -Wno-multichar -D_ARM_ASSEM_
+   LDFLAGS += -shared -Wl,--version-script=../link.T -fPIC
+   USE_VORBIS = 0
+   USE_THEORADEC = 0
+   USE_TREMOR = 1
+   HAVE_MT32EMU = 0
+   DEFINES +=  -marm -mtune=cortex-a35 -mfpu=neon-fp-armv8 -mfloat-abi=hard -march=armv8-a+crc
+   HAVE_NEON = 1
    DEFINES += -DARM
 
 # Emscripten
@@ -420,7 +424,7 @@ else ifneq (,$(findstring windows_msvc2017,$(platform)))
 	ifneq (,$(findstring uwp,$(PlatformSuffix)))
 		LIB := $(LIB);$(shell IFS=$$'\n'; cygpath -w "$(LIB)/store")
 	endif
-    
+
 	export INCLUDE := $(INCLUDE);$(WindowsSDKSharedIncludeDir);$(WindowsSDKUCRTIncludeDir);$(WindowsSDKUMIncludeDir)
 	export LIB := $(LIB);$(WindowsSDKUCRTLibDir);$(WindowsSDKUMLibDir)
 	TARGET := $(TARGET_NAME)_libretro.dll
@@ -460,11 +464,6 @@ else
    LDFLAGS += -lpthread
 endif
 
-###SCUMM VM
-CORE_DIR = ../../../..
-srcdir   = $(CORE_DIR)
-VPATH    = $(CORE_DIR)
-
 # Define toolset
 ifdef TOOLSET
     CC        = $(TOOLSET)gcc
@@ -484,7 +483,7 @@ DEFINES += -DUSE_MT32EMU
 endif
 
 # Define build flags
-DEFINES       += -D__LIBRETRO__ -DNONSTANDARD_PORT -DUSE_RGB_COLOR -DUSE_OSD -DDISABLE_TEXT_CONSOLE -DFRONTEND_SUPPORTS_RGB565
+DEFINES       += -D__LIBRETRO__ -DNONSTANDARD_PORT -DUSE_RGB_COLOR -DUSE_OSD -DDISABLE_TEXT_CONSOLE -DFRONTEND_SUPPORTS_RGB565 -DUSE_TRANSLATION -DDETECTION_STATIC -DHAVE_CONFIG_H -DUSE_BINK -DUSE_LUA -DUSE_TINYGL
 DEPDIR        = .deps
 HAVE_GCC3     = true
 USE_RGB_COLOR = true
@@ -495,9 +494,13 @@ CXXFLAGS += -Wno-reorder
 # Compile platform specific parts (e.g. filesystem)
 ifeq ($(platform), win)
 WIN32 = 1
+DEFINES += -DWIN32 -DUSE_CXX11
+CXXFLAGS += -std=c++11
+LIBS += -lwinmm
 endif
 
 BACKEND := libretro
+DETECT_OBJS :=
 
 include Makefile.common
 
@@ -533,7 +536,7 @@ ifeq ($(platform), libnx)
 endif
 
 OBJOUT   = -o
-LINKOUT  = -o 
+LINKOUT  = -o
 
 ifneq (,$(findstring msvc,$(platform)))
 	OBJOUT = -Fo
@@ -547,12 +550,12 @@ endif
 endif
 
 ifeq ($(platform), wiiu)
-$(TARGET): $(OBJS) libdeps.a 
+$(TARGET): $(OBJS) libdeps.a
 	$(MKDIR) libtemp
 	$(CP) $+ libtemp/
 	$(AR_ALONE) -M < lite_wiiu.mri
 else ifeq ($(platform), libnx)
-$(TARGET): libnx-ln $(OBJS) libdeps.a 
+$(TARGET): libnx-ln $(OBJS) libdeps.a
 	$(MKDIR) libtemp
 	cp $+ libtemp/
 	$(AR) -M < libnx.mri
@@ -562,11 +565,11 @@ $(TARGET): $(OBJS) libdeps.a
 	cp $+ libtemp/
 	$(AR) -M < ctr.mri
 else ifeq ($(STATIC_LINKING), 1)
-$(TARGET): $(OBJS) libdeps.a 
+$(TARGET): $(DETECT_OBJS) $(OBJS) libdeps.a
 	@echo Linking $@...
 	$(HIDE)$(AR) $@ $(wildcard *.o) $(wildcard */*.o) $(wildcard */*/*.o) $(wildcard */*/*/*.o) $(wildcard */*/*/*/*.o)  $(wildcard */*/*/*/*/*.o)
 else
-$(TARGET): $(OBJS) libdeps.a 
+$(TARGET): $(DETECT_OBJS) $(OBJS) libdeps.a
 	@echo Linking $@...
 	$(HIDE)$(LD) $(LDFLAGS) $+ $(LIBS) $(LINKOUT)$@
 endif
@@ -600,10 +603,10 @@ endif
 clean:
 	@echo Cleaning project...
 	$(HIDE)$(RM_REC) $(DEPDIRS)
-	$(HIDE)$(RM) $(OBJS) $(OBJS_DEPS) libdeps.a $(TARGET)
+	$(HIDE)$(RM) $(OBJS) $(DETECT_OBJS) $(OBJS_DEPS) libdeps.a $(TARGET)
 ifeq ($(platform), wiiu)
 	$(HIDE)$(RM_REC) libtemp
-endif	
+endif
 ifeq ($(platform), libnx)
 	$(HIDE)$(RM_REC) libtemp
 	$(HIDE)$(RM) audio
@@ -616,7 +619,7 @@ ifeq ($(platform), libnx)
 	$(HIDE)$(RM) image
 	$(HIDE)$(RM) video
 	$(HIDE)$(RM) libnx-ln
-endif	
+endif
 
 # Include the dependency tracking files.
 -include $(wildcard $(addsuffix /*.d,$(DEPDIRS)))

@@ -28,7 +28,7 @@
 
 #include "base/main.h"
 #include "common/system.h"
-#include "graphics/surface.libretro.h"
+#include "surface.libretro.h"
 
 #ifndef F_OK
 #define F_OK 0

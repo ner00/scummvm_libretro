@@ -2,7 +2,7 @@
 
 #include "base/main.h"
 #include "common/scummsys.h"
-#include "graphics/surface.libretro.h"
+#include "surface.libretro.h"
 #include "audio/mixer_intern.h"
 #include "os.h"
 #include <libco.h>
@@ -58,6 +58,10 @@ static bool speed_hack_is_enabled = false;
 
 char cmd_params[20][200];
 char cmd_params_num;
+
+int adjusted_RES_W = 0;
+int adjusted_RES_H = 0;
+
 
 void retro_set_environment(retro_environment_t cb)
 {
@@ -123,13 +127,13 @@ void retro_get_system_info(struct retro_system_info *info)
 
 void retro_get_system_av_info(struct retro_system_av_info *info)
 {
-   info->geometry.base_width  = RES_W;
+   info->geometry.base_width = RES_W;
    info->geometry.base_height = RES_H;
-   info->geometry.max_width   = RES_W;
-   info->geometry.max_height  = RES_H;
+   info->geometry.max_width = RES_W;
+   info->geometry.max_height = RES_H;
    info->geometry.aspect_ratio = 4.0f / 3.0f;
    info->timing.fps = 60.0;
-   info->timing.sample_rate = 44100.0;
+   info->timing.sample_rate = 48000.0;
 }
 
 void retro_init (void)
@@ -288,7 +292,7 @@ bool retro_load_game(const struct retro_game_info *game)
 
    cmd_params_num = 1;
    strcpy(cmd_params[0],"scummvm\0");
-   
+
    update_variables();
 
    if (game)
@@ -352,6 +356,10 @@ bool retro_load_game(const struct retro_game_info *game)
       { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT, "F1" },
       { 0, RETRO_DEVICE_MOUSE,  0, RETRO_DEVICE_ID_MOUSE_LEFT,    "Left click" },
       { 0, RETRO_DEVICE_MOUSE,  0, RETRO_DEVICE_ID_MOUSE_RIGHT,   "Right click" },
+      { 0, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_LEFT,   RETRO_DEVICE_ID_ANALOG_X, "Left Analog X" },
+      { 0, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_LEFT,   RETRO_DEVICE_ID_ANALOG_Y, "Left Analog Y" },
+      { 0, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_RIGHT,  RETRO_DEVICE_ID_ANALOG_X, "Right Analog X" },
+      { 0, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_RIGHT,  RETRO_DEVICE_ID_ANALOG_Y, "Right Analog Y" },
       { 0 },
   };
 
@@ -460,11 +468,13 @@ void retro_run (void)
    {
       /* Upload video: TODO: Check the CANDUPE env value */
       const Graphics::Surface& screen = getScreen();
+
       video_cb(screen.pixels, screen.w, screen.h, screen.pitch);
 
       /* Upload audio */
-      static uint32 buf[735];
-      int count = ((Audio::MixerImpl*)g_system->getMixer())->mixCallback((byte*)buf, 735*4);
+      static uint32 buf[800];
+      int count = ((Audio::MixerImpl*)g_system->getMixer())->mixCallback((byte*)buf, 800*4);
+
 #if defined(_3DS)
       /* Hack: 3DS will produce static noise
        * unless we manually send a zeroed

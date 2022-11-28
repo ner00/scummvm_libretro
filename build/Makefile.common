@@ -149,9 +149,12 @@ INCFLAGS    := -I$(LIBRETRO_DIR) -I$(CORE_DIR) -I$(DEPS_DIR) -I$(CORE_DIR)/engin
 INCLUDES    += $(INCFLAGS)
 MODULE_DIRS += $(LIBRETRO_DIR)
 
+
 OBJS := $(LIBRETRO_DIR)/libretro.o \
 			$(LIBRETRO_DIR)/libretro_os.o \
-			$(LIBRETRO_COMM_DIR)/file/retro_stat.o
+			$(LIBRETRO_COMM_DIR)/file/retro_stat.o \
+			$(LIBRETRO_DIR)/libretro-fs.o \
+			$(LIBRETRO_DIR)/libretro-fs-factory.o
 
 ifeq ($(USE_LIBCO), 1)
 OBJS += $(LIBRETRO_COMM_DIR)/libco/libco.o
@@ -165,7 +168,7 @@ endif
 OBJS_DEPS :=
 
 ifeq ($(USE_FLUIDSYNTH), 1)
-DEFINES += -DUSE_FLUIDSYNTH
+DEFINES += -DUSE_FLUIDSYNTH -DUSE_FLUIDLITE
 INCLUDES += -I$(DEPS_DIR)/fluidsynth/include \
 			-I$(DEPS_DIR)/fluidsynth/src
 OBJS_DEPS += $(DEPS_DIR)/fluidsynth/src/fluid_chan.o \
@@ -201,7 +204,8 @@ OBJS_DEPS += $(DEPS_DIR)/libFLAC/bitreader.o \
 			$(DEPS_DIR)/libFLAC/stream_decoder.o
 
 ifeq ($(platform), win)
-OBJS_DEPS += $(DEPS_DIR)/libFLAC/share/win_utf8_io/win_utf8_io.o
+OBJS_DEPS += $(DEPS_DIR)/libFLAC/share/win_utf8_io/win_utf8_io.o \
+			 $(CORE_DIR)/backends/platform/sdl/win32/win32_wrapper.o
 endif
 endif
 
@@ -442,6 +446,7 @@ OBJS_DEPS += $(DEPS_DIR)/freetype/src/autofit/afangles.o \
 			$(DEPS_DIR)/freetype/src/base/ftglyph.o \
 			$(DEPS_DIR)/freetype/src/base/fthash.o \
 			$(DEPS_DIR)/freetype/src/base/ftinit.o \
+			$(DEPS_DIR)/freetype/src/base/ftsnames.o \
 			$(DEPS_DIR)/freetype/src/base/ftobjs.o \
 			$(DEPS_DIR)/freetype/src/base/ftsystem.o \
 			$(DEPS_DIR)/freetype/src/base/ftoutln.o \
@@ -546,20 +551,26 @@ all: $(TARGET)
 
 MODULES := test devtools base $(MODULES)
 
--include $(CORE_DIR)/engines/engines.mk
+-include $(LIBRETRO_DIR)/engines/engines.mk
 
 # After the game specific modules follow the shared modules
 MODULES += \
+	engines \
 	gui \
 	backends \
-	engines \
 	video \
 	image \
 	graphics \
 	audio \
+	math \
 	common \
-	po
+	po \
+	doc
+
+ifeq ($(USE_LUA),1)
+   MODULES += common/lua
+endif
 
 ifeq ($(USE_MT32EMU),1)
-MODULES += audio/softsynth/mt32
+   MODULES += audio/softsynth/mt32
 endif

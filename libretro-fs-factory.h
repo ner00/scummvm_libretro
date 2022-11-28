@@ -8,51 +8,33 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  *
  */
 
-#include <sys/types.h>
-#include <stdio.h>
-#include <fcntl.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdarg.h>
-#include <assert.h>
-#include <ctype.h>
-#include <math.h>
-#include <new>
-#include <limits.h>
-#include <stddef.h>
+#ifndef LIBRETRO_FILESYSTEM_FACTORY_H
+#define LIBRETRO_FILESYSTEM_FACTORY_H
 
-/* newlib ctype.h defines _X for hex digit flag.
-   This conflicts with the use of _X as a variable name. */
-#undef _X
+#include "backends/fs/fs-factory.h"
 
-#define RES_W 640
-#define RES_H 480
+/**
+ * Creates LibRetroFilesystemNode objects.
+ *
+ * Parts of this class are documented in the base interface class, FilesystemFactory.
+ */
+class LibRetroFilesystemFactory : public FilesystemFactory {
+protected:
+	virtual AbstractFSNode *makeRootFileNode() const;
+	virtual AbstractFSNode *makeCurrentDirectoryFileNode() const;
+	virtual AbstractFSNode *makeFileNodePath(const Common::String &path) const;
+};
 
-#if defined(DINGUX) || defined(_3DS)
-#define RES_W_OVERLAY 320
-#define RES_H_OVERLAY 240
-#else
-#define RES_W_OVERLAY 640
-#define RES_H_OVERLAY 480
-#endif
-
-// HACK: With MinGW, GRIM engine seems to crash when using setjmp and longjmp if not using builtin versions
-#if defined __MINGW64__ || defined __MINGW32__
-#include <setjmp.h>
-#undef setjmp
-#undef longjmp
-#define setjmp(a) (__builtin_setjmp (a))
-#define longjmp(a,b) (__builtin_longjmp (a,b))
-#endif
+#endif /*LIBRETRO_FILESYSTEM_FACTORY_H*/

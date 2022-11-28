@@ -29,16 +29,17 @@
 #include <retro_miscellaneous.h>
 #include <retro_inline.h>
 
-#include "graphics/surface.libretro.h"
+#include "surface.libretro.h"
 #include "backends/base-backend.h"
 #include "common/events.h"
+#include "common/config-manager.h"
 #include "audio/mixer_intern.h"
 
 #if defined(_WIN32)
 #include "backends/fs/windows/windows-fs-factory.h"
 #define FS_SYSTEM_FACTORY WindowsFilesystemFactory
 #else
-#include "backends/fs/libretro/libretro-fs-factory.h"
+#include "libretro-fs-factory.h"
 #define FS_SYSTEM_FACTORY LibRetroFilesystemFactory
 #endif
 
@@ -65,6 +66,24 @@
 #include "retro_emu_thread.h"
 
 extern retro_log_printf_t log_cb;
+
+#include "common/mutex.h"
+
+/**
+ *  Dummy mutex implementation
+ */
+class LibretroMutexInternal final : public Common::MutexInternal {
+public:
+	LibretroMutexInternal() {};
+	~LibretroMutexInternal() override {};
+
+	bool lock() override { return 0; }
+	bool unlock() override { return 0; };
+};
+
+Common::MutexInternal *createLibretroMutexInternal() {
+	return new LibretroMutexInternal();
+}
 
 struct RetroPalette
 {
@@ -109,7 +128,7 @@ static INLINE void blit_uint8_uint16_fast(Graphics::Surface& aOut, const Graphic
          uint8 r, g, b;
 
          const uint8_t val = in[j];
-         if(val != 0xFFFFFFFF)
+         //if(val != 0xFFFFFFFF)
          {
             if(aIn.format.bytesPerPixel == 1)
             {
@@ -144,8 +163,8 @@ static INLINE void blit_uint32_uint16(Graphics::Surface& aOut, const Graphics::S
 
          uint8 r, g, b;
 
-         const uint32_t val = in[j];
-         if(val != 0xFFFFFFFF)
+         //const uint32_t val = in[j];
+         //if(val != 0xFFFFFFFF)
          {
             aIn.format.colorToRGB(in[j], r, g, b);
             out[j] = aOut.format.RGBToColor(r, g, b);
@@ -171,8 +190,8 @@ static INLINE void blit_uint16_uint16(Graphics::Surface& aOut, const Graphics::S
 
          uint8 r, g, b;
 
-         const uint16_t val = in[j];
-         if(val != 0xFFFFFFFF)
+         //const uint16_t val = in[j];
+         //if(val != 0xFFFFFFFF)
          {
             aIn.format.colorToRGB(in[j], r, g, b);
             out[j] = aOut.format.RGBToColor(r, g, b);
@@ -233,6 +252,45 @@ static void blit_uint16_uint16(Graphics::Surface& aOut, const Graphics::Surface&
          {
             aIn.format.colorToRGB(in[j], r, g, b);
             out[j + aX] = aOut.format.RGBToColor(r, g, b);
+         }
+      }
+   }
+}
+
+static void blit_uint32_uint16(Graphics::Surface& aOut, const Graphics::Surface& aIn, int aX, int aY, const RetroPalette& aColors, uint32 aKeyColor)
+{
+   for(int i = 0; i < aIn.h; i ++)
+   {
+      if((i + aY) < 0 || (i + aY) >= aOut.h)
+         continue;
+
+      uint32_t* const in = (uint32_t*)aIn.pixels + (i * aIn.w);
+      uint16_t* const out = (uint16_t*)aOut.pixels + ((i + aY) * aOut.w);
+
+      for(int j = 0; j < aIn.w; j ++)
+      {
+         if((j + aX) < 0 || (j + aX) >= aOut.w)
+            continue;
+
+         uint8 in_a, in_r, in_g, in_b;
+         uint8 out_r, out_g, out_b;
+         uint32_t blend_r, blend_g, blend_b;
+
+         const uint32_t val = in[j];
+         if(val != aKeyColor)
+         {
+            aIn.format.colorToARGB(in[j], in_a, in_r, in_g, in_b);
+
+            if(in_a)
+            {
+               aOut.format.colorToRGB(out[j + aX], out_r, out_g, out_b);
+
+               blend_r = ((in_r * in_a) + (out_r * (255 - in_a))) / 255;
+               blend_g = ((in_g * in_a) + (out_g * (255 - in_a))) / 255;
+               blend_b = ((in_b * in_a) + (out_b * (255 - in_a))) / 255;
+
+               out[j + aX] = aOut.format.RGBToColor(blend_r, blend_g, blend_b);
+            }
          }
       }
    }
@@ -363,12 +421,13 @@ class OSystem_RETRO : public EventsBaseBackend, public PaletteManager {
 #else
          _overlay.create(RES_W_OVERLAY, RES_H_OVERLAY, Graphics::PixelFormat(2, 5, 5, 5, 1, 10, 5, 0, 15));
 #endif
-         _mixer = new Audio::MixerImpl(44100);
+         _mixer = new Audio::MixerImpl(48000);
          _timerManager = new DefaultTimerManager();
 
          _mixer->setReady(true);
 
-         BaseBackend::initBackend();
+         EventsBaseBackend::initBackend();
+      }
       }
 
       virtual bool hasFeature(Feature f)
@@ -396,6 +455,11 @@ class OSystem_RETRO : public EventsBaseBackend, public PaletteManager {
       virtual int getDefaultGraphicsMode() const
       {
          return 0;
+      }
+
+      virtual bool isOverlayVisible() const
+      {
+         return false;
       }
 
       virtual bool setGraphicsMode(int mode)
@@ -497,10 +561,19 @@ class OSystem_RETRO : public EventsBaseBackend, public PaletteManager {
             const int x = _mouseX - _mouseHotspotX;
             const int y = _mouseY - _mouseHotspotY;
 
-            if(_mouseImage.format.bytesPerPixel == 1)
-               blit_uint8_uint16(_screen, _mouseImage, x, y, _mousePaletteEnabled ? _mousePalette : _gamePalette, _mouseKeyColor);
-            else
-               blit_uint16_uint16(_screen, _mouseImage, x, y, _mousePaletteEnabled ? _mousePalette : _gamePalette, _mouseKeyColor);
+            switch(_mouseImage.format.bytesPerPixel)
+            {
+               case 1:
+               case 3:
+                  blit_uint8_uint16(_screen, _mouseImage, x, y, _mousePaletteEnabled ? _mousePalette : _gamePalette, _mouseKeyColor);
+                  break;
+               case 2:
+                  blit_uint16_uint16(_screen, _mouseImage, x, y, _mousePaletteEnabled ? _mousePalette : _gamePalette, _mouseKeyColor);
+                  break;
+               case 4:
+                  blit_uint32_uint16(_screen, _mouseImage, x, y, _mousePaletteEnabled ? _mousePalette : _gamePalette, _mouseKeyColor);
+                  break;
+            }
          }
       }
 
@@ -519,7 +592,7 @@ class OSystem_RETRO : public EventsBaseBackend, public PaletteManager {
          // TODO
       }
 
-      virtual void showOverlay()
+      virtual void showOverlay(bool inGUI)
       {
          _overlayVisible = true;
       }
@@ -534,15 +607,15 @@ class OSystem_RETRO : public EventsBaseBackend, public PaletteManager {
          _overlay.fillRect(Common::Rect(_overlay.w, _overlay.h), 0);
       }
 
-      virtual void grabOverlay(void *buf, int pitch)
+      virtual void grabOverlay(Graphics::Surface &surface)
       {
          const unsigned char *src = (unsigned char*)_overlay.pixels;
-         unsigned char *dst = (byte *)buf;
+         unsigned char *dst = (byte *)surface.getPixels();;
          unsigned i = RES_H_OVERLAY;
 
          do{
             memcpy(dst, src, RES_W_OVERLAY << 1);
-            dst += pitch;
+            dst += surface.pitch;
             src += RES_W_OVERLAY << 1;
          }while(--i);
       }
@@ -700,24 +773,9 @@ class OSystem_RETRO : public EventsBaseBackend, public PaletteManager {
 			}
       }
 
-      virtual MutexRef createMutex(void)
+      virtual Common::MutexInternal *createMutex(void)
       {
-         return MutexRef();
-      }
-
-      virtual void lockMutex(MutexRef mutex)
-      {
-         /* EMPTY */
-      }
-
-      virtual void unlockMutex(MutexRef mutex)
-      {
-         /* EMPTY */
-      }
-
-      virtual void deleteMutex(MutexRef mutex)
-      {
-         /* EMPTY */
+         return createLibretroMutexInternal();
       }
 
       virtual void quit()
@@ -730,7 +788,7 @@ class OSystem_RETRO : public EventsBaseBackend, public PaletteManager {
          // TODO: NOTHING?
       }
 
-      virtual void getTimeAndDate(TimeDate &t) const
+      virtual void getTimeAndDate(TimeDate &t, bool skipRecord) const
       {
          time_t curTime = time(NULL);
 
@@ -1257,7 +1315,7 @@ class OSystem_RETRO : public EventsBaseBackend, public PaletteManager {
       {
          Common::Event ev;
          ev.type = Common::EVENT_QUIT;
-         ((OSystem_RETRO*)g_system)->getEventManager()->pushEvent(ev);
+         dynamic_cast<OSystem_RETRO *>(g_system)->getEventManager()->pushEvent(ev);
       }
 };
 
@@ -1268,17 +1326,17 @@ OSystem* retroBuildOS(bool aEnableSpeedHack)
 
 const Graphics::Surface& getScreen()
 {
-   return ((OSystem_RETRO*)g_system)->getScreen();
+   return dynamic_cast<OSystem_RETRO *>(g_system)->getScreen();
 }
 
 void retroProcessMouse(retro_input_state_t aCallback, int device, float gampad_cursor_speed, bool analog_response_is_quadratic, int analog_deadzone, float mouse_speed)
 {
-   ((OSystem_RETRO*)g_system)->processMouse(aCallback, device, gampad_cursor_speed, analog_response_is_quadratic, analog_deadzone, mouse_speed);
+   dynamic_cast<OSystem_RETRO *>(g_system)->processMouse(aCallback, device, gampad_cursor_speed, analog_response_is_quadratic, analog_deadzone, mouse_speed);
 }
 
 void retroPostQuit()
 {
-   ((OSystem_RETRO*)g_system)->postQuit();
+   dynamic_cast<OSystem_RETRO *>(g_system)->postQuit();
 }
 
 void retroSetSystemDir(const char* aPath)
@@ -1293,5 +1351,5 @@ void retroSetSaveDir(const char* aPath)
 
 void retroKeyEvent(bool down, unsigned keycode, uint32_t character, uint16_t key_modifiers)
 {
-   ((OSystem_RETRO*)g_system)->processKeyEvent(down, keycode, character, key_modifiers);
+   dynamic_cast<OSystem_RETRO *>(g_system)->processKeyEvent(down, keycode, character, key_modifiers);
 }
