@@ -428,6 +428,13 @@ class OSystem_RETRO : public EventsBaseBackend, public PaletteManager {
 
          EventsBaseBackend::initBackend();
       }
+
+      virtual void engineInit(){
+         Common::String engineId = ConfMan.get("engineid");
+         if ( engineId.equalsIgnoreCase("scumm") && ConfMan.getBool("original_gui") ){
+            ConfMan.setBool("original_gui",false);
+            log_cb(RETRO_LOG_INFO, "\"original_gui\" setting forced to false\n");
+         }
       }
 
       virtual bool hasFeature(Feature f)
