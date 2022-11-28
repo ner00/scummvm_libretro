@@ -24,7 +24,7 @@ ifndef NO_WIP
 endif
 
 ##SCUMM VM
-CORE_DIR = ../../../..
+CORE_DIR = scummvm
 srcdir   = $(CORE_DIR)
 VPATH    = $(CORE_DIR)
 
@@ -523,15 +523,15 @@ DEPDIRS = $(addsuffix $(DEPDIR),$(MODULE_DIRS))
 # Hack for libnx DEPSDIR issues
 libnx-ln:
 ifeq ($(platform), libnx)
-	ln -s ../../../../audio/ audio
-	ln -s ../../../../backends/ backends
-	ln -s ../../../../base/ base
-	ln -s ../../../../common/ common
-	ln -s ../../../../engines/ engines
-	ln -s ../../../../graphics/ graphics
-	ln -s ../../../../gui/ gui
-	ln -s ../../../../image/ image
-	ln -s ../../../../video/ video
+	ln -s $(CORE_DIR)/audio/ audio
+	ln -s $(CORE_DIR)/backends/ backends
+	ln -s $(CORE_DIR)/base/ base
+	ln -s $(CORE_DIR)/common/ common
+	ln -s $(CORE_DIR)/engines/ engines
+	ln -s $(CORE_DIR)/graphics/ graphics
+	ln -s $(CORE_DIR)/gui/ gui
+	ln -s $(CORE_DIR)/image/ image
+	ln -s $(CORE_DIR)/video/ video
 	touch libnx-ln
 endif
 

@@ -39,7 +39,7 @@ function process_group(){
 
 # Set variables
 BUILD_PATH=$(pwd)
-SRC_PATH="${BUILD_PATH}/../../../.."
+SRC_PATH="${BUILD_PATH}/../scummvm"
 TMP_PATH="${BUILD_PATH}/tmp_data"
 BUNDLE_DIR="scummvm"
 BUNDLE_DATAFILES_DIR="${BUNDLE_DIR}/extra"

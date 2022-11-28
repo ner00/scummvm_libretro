@@ -1,6 +1,7 @@
-LIBRETRO_DIR      = $(CORE_DIR)/backends/platform/libretro
+LIBRETRO_DIR      = src
 DEPS_DIR          = $(LIBRETRO_DIR)/deps
 LIBRETRO_COMM_DIR = $(LIBRETRO_DIR)/libretro-common
+BUILD_DIR         = build
 
 # Define enabled modules
 #
@@ -9,19 +10,19 @@ LIBRETRO_COMM_DIR = $(LIBRETRO_DIR)/libretro-common
 # config.mk.engines.lite is a static file with a reduced set of engines for minimal builds
 
 $(info Configuring ScummVM engines...)
-ifneq ($(shell cd $(LIBRETRO_DIR)/build; ./configure_engines.sh $(NO_HIGH_DEF) $(NO_WIP)),0)
+ifneq ($(shell cd $(BUILD_DIR); ./configure_engines.sh $(NO_HIGH_DEF) $(NO_WIP)),0)
 	E := $(error Error executing $(LIBRETRO_DIR)/build/configure_engines.sh)
 endif
 
 $(info Bundling ScummVM Datafiles and themes...)
-ifneq ($(shell cd $(LIBRETRO_DIR)/build; ./bundle_datafiles.sh),0)
-	W := $(warning Error executing $(LIBRETRO_DIR)/build/bundle_datafiles.sh)
+ifneq ($(shell cd $(BUILD_DIR); ./bundle_datafiles.sh),0)
+	W := $(warning Error executing $(BUILD_DIR)/bundle_datafiles.sh)
 endif
 
 ifeq ($(LITE), 1)
-	include $(LIBRETRO_DIR)/build/config.mk.engines.lite
+	include $(BUILD_DIR)/config.mk.engines.lite
 else
-	include $(LIBRETRO_DIR)/build/config.mk.engines
+	include $(BUILD_DIR)/build/config.mk.engines
 endif
 
 INCFLAGS    := -I$(LIBRETRO_DIR) -I$(CORE_DIR) -I$(DEPS_DIR) -I$(CORE_DIR)/engines -I$(LIBRETRO_COMM_DIR)/include -I$(LIBRETRO_COMM_DIR)/include/compat
@@ -68,7 +69,7 @@ OBJS_DEPS += $(DEPS_DIR)/fluidsynth/src/fluid_chan.o \
 			$(DEPS_DIR)/fluidsynth/src/fluid_tuning.o \
 			$(DEPS_DIR)/fluidsynth/src/fluid_voice.o
 endif
- 
+
 ifeq ($(USE_FLAC), 1)
 DEFINES += -DUSE_FLAC
 INCLUDES += -I$(DEPS_DIR)/libFLAC/include
