@@ -22,7 +22,7 @@ endif
 ifeq ($(LITE), 1)
 	include $(BUILD_DIR)/config.mk.engines.lite
 else
-	include $(BUILD_DIR)/build/config.mk.engines
+	include $(BUILD_DIR)/config.mk.engines
 endif
 
 INCFLAGS    := -I$(LIBRETRO_DIR) -I$(CORE_DIR) -I$(DEPS_DIR) -I$(CORE_DIR)/engines -I$(LIBRETRO_COMM_DIR)/include -I$(LIBRETRO_COMM_DIR)/include/compat
