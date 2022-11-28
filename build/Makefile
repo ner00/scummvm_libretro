@@ -63,9 +63,9 @@ ifeq ($(shell uname -a),)
 endif
 
 TARGET_NAME := scummvm
-GIT_VERSION := " $(shell git rev-parse --short HEAD || echo unknown)"
-ifneq ($(GIT_VERSION)," unknown")
-	CXXFLAGS += -DGIT_VERSION=\"$(GIT_VERSION)\"
+GIT_VERSION := $(shell cd $(CORE_DIR); git rev-parse --short HEAD || echo unknown)
+ifneq ($(GIT_VERSION),unknown)
+	DEFINES += -DGIT_VERSION=\"$(GIT_VERSION)\"
 endif
 
 TARGET_64BIT = 0

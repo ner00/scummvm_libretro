@@ -119,7 +119,7 @@ void retro_get_system_info(struct retro_system_info *info)
 #ifndef GIT_VERSION
 #define GIT_VERSION ""
 #endif
-   info->library_version = SCUMMVM_VERSION GIT_VERSION;
+   info->library_version = SCUMMVM_VERSION " " GIT_VERSION;
    info->valid_extensions = "scummvm";
    info->need_fullpath = true;
    info->block_extract = false;
