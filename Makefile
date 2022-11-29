@@ -24,9 +24,10 @@ ifndef NO_WIP
 endif
 
 ##SCUMM VM
-CORE_DIR = scummvm
-srcdir   = $(CORE_DIR)
-VPATH    = $(CORE_DIR)
+CORE_DIR      = scummvm
+srcdir        = $(CORE_DIR)
+VPATH         = $(CORE_DIR)
+BUILD_DIR     = build
 
 HIDE := @
 SPACE :=
@@ -89,7 +90,7 @@ LS        = ls
 ifeq ($(platform), unix)
    TARGET  := $(TARGET_NAME)_libretro.so
    DEFINES += -fPIC
-   LDFLAGS += -shared -Wl,--version-script=../link.T -fPIC
+   LDFLAGS += -shared -Wl,--version-script=$(BUILD_DIR)/link.T -fPIC
    TARGET_64BIT := $(BUILD_64BIT)
    CXXFLAGS := -std=c++11
    DEFINES += -DUSE_CXX11
@@ -154,7 +155,7 @@ endif
 else ifeq ($(platform), qnx)
    TARGET  := $(TARGET_NAME)_libretro_$(platform).so
    DEFINES += -fPIC -DSYSTEM_NOT_SUPPORTING_D_TYPE
-   LDFLAGS += -shared -Wl,--version-script=../link.T -fPIC
+   LDFLAGS += -shared -Wl,--version-script=$(BUILD_DIR)/link.T -fPIC
    CC = qcc -Vgcc_ntoarmv7le
    CXX = QCC -Vgcc_ntoarmv7le
    LD = QCC -Vgcc_ntoarmv7le
@@ -264,7 +265,7 @@ else ifeq ($(platform), gcw0)
    RANLIB = /opt/gcw0-toolchain/usr/bin/mipsel-linux-ranlib
    DEFINES += -DDINGUX -fomit-frame-pointer -ffast-math -march=mips32 -mtune=mips32r2 -mhard-float -fPIC
    DEFINES += -ffunction-sections -fdata-sections
-   LDFLAGS += -shared -Wl,--gc-sections -Wl,--version-script=../link.T -fPIC
+   LDFLAGS += -shared -Wl,--gc-sections -Wl,--version-script=$(BUILD_DIR)/link.T -fPIC
    USE_VORBIS = 0
    USE_THEORADEC = 0
    USE_TREMOR = 1
@@ -277,7 +278,7 @@ else ifneq (,$(findstring rpi4,$(platform)))
    TARGET := $(TARGET_NAME)_libretro.so
    TARGET_64BIT := $(BUILD_64BIT)
    DEFINES += -fPIC -Wno-multichar -D_ARM_ASSEM_
-   LDFLAGS += -shared -Wl,--version-script=../link.T -fPIC
+   LDFLAGS += -shared -Wl,--version-script=$(BUILD_DIR)/link.T -fPIC
    DEFINES += -mcpu=cortex-a72
    CXXFLAGS := -std=c++11
    DEFINES += -DUSE_CXX11
@@ -286,7 +287,7 @@ else ifneq (,$(findstring rpi4,$(platform)))
 else ifeq ($(platform), android-armv7)
    TARGET  := $(TARGET_NAME)_libretro_android.so
    DEFINES += -fPIC -Wno-multichar -D_ARM_ASSEM_
-   LDFLAGS += -shared -Wl,--version-script=../link.T -fPIC
+   LDFLAGS += -shared -Wl,--version-script=$(BUILD_DIR)/link.T -fPIC
    TOOLSET = arm-linux-androideabi-
    USE_VORBIS = 0
    USE_THEORADEC = 0
@@ -295,7 +296,7 @@ else ifeq ($(platform), android-armv7)
 else ifneq (,$(findstring armv,$(platform)))
    TARGET := $(TARGET_NAME)_libretro.so
    DEFINES += -fPIC -Wno-multichar -D_ARM_ASSEM_
-   LDFLAGS += -shared -Wl,--version-script=../link.T -fPIC
+   LDFLAGS += -shared -Wl,--version-script=$(BUILD_DIR)/link.T -fPIC
    USE_VORBIS = 0
    USE_THEORADEC = 0
    USE_TREMOR = 1
@@ -322,7 +323,7 @@ endif
 else ifneq (,$(findstring oga_a35_neon_hardfloat,$(platform)))
    TARGET := $(TARGET_NAME)_libretro.so
    DEFINES += -fPIC -Wno-multichar -D_ARM_ASSEM_
-   LDFLAGS += -shared -Wl,--version-script=../link.T -fPIC
+   LDFLAGS += -shared -Wl,--version-script=$(BUILD_DIR)/link.T -fPIC
    USE_VORBIS = 0
    USE_THEORADEC = 0
    USE_TREMOR = 1
@@ -437,7 +438,7 @@ else
 	TARGET  := $(TARGET_NAME)_libretro.dll
 	DEFINES += -DHAVE_FSEEKO -DHAVE_INTTYPES_H -fPIC
 	CXXFLAGS += -fno-permissive
-	LDFLAGS += -shared -static-libgcc -static-libstdc++ -s -Wl,--version-script=../link.T -fPIC
+	LDFLAGS += -shared -static-libgcc -static-libstdc++ -s -Wl,--version-script=$(BUILD_DIR)/link.T -fPIC
 endif
 
 ifeq ($(DEBUG), 1)

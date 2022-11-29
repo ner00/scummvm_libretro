@@ -49,14 +49,14 @@ done
 # Create needed engines build files
 awk -f "engines.awk" < /dev/null > /dev/null
 
-mkdir -p "${BUILD_PATH}/../engines"
+mkdir -p "engines"
 
-copy_if_changed engines/engines.mk.new "${BUILD_PATH}/../engines/engines.mk"
-copy_if_changed engines/detection_table.h.new "${BUILD_PATH}/../engines/detection_table.h"
-copy_if_changed engines/plugins_table.h.new "${BUILD_PATH}/../engines/plugins_table.h"
-copy_if_changed config.mk.engines "${BUILD_PATH}/config.mk.engines"
+copy_if_changed engines/engines.mk.new "engines/engines.mk"
+copy_if_changed engines/detection_table.h.new "engines/detection_table.h"
+copy_if_changed engines/plugins_table.h.new "engines/plugins_table.h"
+#copy_if_changed engines/config.mk.engines "config.mk.engines"
 
 # Test NO_WIP
-[ $2 -ne 1 ] && sed -i "s/# \(.*\)/\1 = STATIC_PLUGIN/g" "${BUILD_PATH}/config.mk.engines"
+[ $2 -ne 1 ] && sed -i "s/# \(.*\)/\1 = STATIC_PLUGIN/g" "config.mk.engines"
 
 echo 0

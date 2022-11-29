@@ -599,7 +599,7 @@ class OSystem_RETRO : public EventsBaseBackend, public PaletteManager {
          // TODO
       }
 
-      virtual void showOverlay(bool inGUI)
+      virtual void showOverlay()
       {
          _overlayVisible = true;
       }

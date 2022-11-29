@@ -1,7 +1,6 @@
 LIBRETRO_DIR      = src
 DEPS_DIR          = $(LIBRETRO_DIR)/deps
 LIBRETRO_COMM_DIR = $(LIBRETRO_DIR)/libretro-common
-BUILD_DIR         = build
 
 # Define enabled modules
 #
@@ -11,7 +10,7 @@ BUILD_DIR         = build
 
 $(info Configuring ScummVM engines...)
 ifneq ($(shell cd $(BUILD_DIR); ./configure_engines.sh $(NO_HIGH_DEF) $(NO_WIP)),0)
-	E := $(error Error executing $(LIBRETRO_DIR)/build/configure_engines.sh)
+	E := $(error Error executing $(BUILD_DIR)/configure_engines.sh)
 endif
 
 $(info Bundling ScummVM Datafiles and themes...)
@@ -22,7 +21,7 @@ endif
 ifeq ($(LITE), 1)
 	include $(BUILD_DIR)/config.mk.engines.lite
 else
-	include $(BUILD_DIR)/config.mk.engines
+	include $(CORE_DIR)/config.mk.engines
 endif
 
 INCFLAGS    := -I$(LIBRETRO_DIR) -I$(CORE_DIR) -I$(DEPS_DIR) -I$(CORE_DIR)/engines -I$(LIBRETRO_COMM_DIR)/include -I$(LIBRETRO_COMM_DIR)/include/compat
@@ -432,7 +431,7 @@ all: $(TARGET)
 
 MODULES := test devtools base $(MODULES)
 
--include $(LIBRETRO_DIR)/engines/engines.mk
+include $(CORE_DIR)/engines/engines.mk
 
 # After the game specific modules follow the shared modules
 MODULES += \
