@@ -1,4 +1,3 @@
-##LIBRETRO
 DEBUG          = 0
 USE_ZLIB       = 1
 USE_TREMOR     = 0
@@ -19,15 +18,20 @@ USE_TINYGL     = 1
 USE_BINK       = 1
 NO_HIGH_DEF    = 0
 LITE           = 0
-ifndef NO_WIP
-   NO_WIP      = 0
-endif
+NO_WIP        ?= 1
 
-##SCUMM VM
-CORE_DIR      = scummvm
-srcdir        = $(CORE_DIR)
-VPATH         = $(CORE_DIR)
-BUILD_DIR     = build
+CORE_DIR            = scummvm
+BUILD_DIR           = build
+LIBRETRO_DIR        = src
+srcdir              := $(CORE_DIR)
+VPATH               := $(CORE_DIR)
+DEPS_DIR            := $(LIBRETRO_DIR)/deps
+LIBRETRO_COMM_DIR   := $(LIBRETRO_DIR)/libretro-common
+
+TARGET_NAME = scummvm-mainline
+GIT_VERSION := $(shell cd $(CORE_DIR); git rev-parse --short HEAD || echo unknown)
+
+TARGET_64BIT = 0
 
 HIDE := @
 SPACE :=
@@ -63,13 +67,6 @@ ifeq ($(shell uname -a),)
    EXE_EXT = .exe
 endif
 
-TARGET_NAME := scummvm
-GIT_VERSION := $(shell cd $(CORE_DIR); git rev-parse --short HEAD || echo unknown)
-ifneq ($(GIT_VERSION),unknown)
-	DEFINES += -DGIT_VERSION=\"$(GIT_VERSION)\"
-endif
-
-TARGET_64BIT = 0
 ifeq ($(BUILD_64BIT),)
 ifeq ($(shell uname -m), x86_64)
    BUILD_64BIT = 1
@@ -465,6 +462,10 @@ else
    LDFLAGS += -lpthread
 endif
 
+ifneq ($(GIT_VERSION),unknown)
+	DEFINES += -DGIT_VERSION=\"$(GIT_VERSION)\"
+endif
+
 # Define toolset
 ifdef TOOLSET
     CC        = $(TOOLSET)gcc
@@ -477,11 +478,6 @@ endif
 MKDIR         = mkdir -p
 RM            = rm -f
 RM_REC        = rm -rf
-
-ifeq ($(HAVE_MT32EMU),1)
-USE_MT32EMU = 1
-DEFINES += -DUSE_MT32EMU
-endif
 
 # Define build flags
 DEFINES       += -D__LIBRETRO__ -DNONSTANDARD_PORT -DUSE_RGB_COLOR -DUSE_OSD -DDISABLE_TEXT_CONSOLE -DFRONTEND_SUPPORTS_RGB565 -DUSE_TRANSLATION -DDETECTION_STATIC -DHAVE_CONFIG_H -DUSE_BINK -DUSE_LUA -DUSE_TINYGL
@@ -500,7 +496,7 @@ CXXFLAGS += -std=c++11
 LIBS += -lwinmm
 endif
 
-BACKEND := libretro
+#BACKEND := libretro
 DETECT_OBJS :=
 
 include Makefile.common
@@ -516,10 +512,10 @@ CXXFLAGS += $(DEFINES) $(INCLUDES)
 CFLAGS += $(DEFINES) $(INCLUDES)
 
 # Include the build instructions for all modules
--include $(addprefix $(CORE_DIR)/, $(addsuffix /module.mk,$(MODULES)))
+include $(addprefix $(CORE_DIR)/, $(addsuffix /module.mk,$(MODULES)))
 
 # Depdir information
-DEPDIRS = $(addsuffix $(DEPDIR),$(MODULE_DIRS))
+DEPDIRS := $(addsuffix $(DEPDIR),$(MODULE_DIRS))
 
 # Hack for libnx DEPSDIR issues
 libnx-ln:
@@ -577,8 +573,8 @@ endif
 
 libdeps.a: $(OBJS_DEPS)
 ifeq ($(platform), libnx)
-		@echo Linking $@...
-		$(HIDE)$(AR) -rc $@ $^
+	@echo Linking $@...
+	$(HIDE)$(AR) -rc $@ $^
 else
 		@echo Linking $@...
 		$(HIDE)$(AR) $@ $^
@@ -610,17 +606,22 @@ ifeq ($(platform), wiiu)
 endif
 ifeq ($(platform), libnx)
 	$(HIDE)$(RM_REC) libtemp
-	$(HIDE)$(RM) audio
-	$(HIDE)$(RM) backends
-	$(HIDE)$(RM) base
-	$(HIDE)$(RM) common
-	$(HIDE)$(RM) engines
-	$(HIDE)$(RM) graphics
-	$(HIDE)$(RM) gui
-	$(HIDE)$(RM) image
-	$(HIDE)$(RM) video
 	$(HIDE)$(RM) libnx-ln
 endif
+	$(HIDE)$(RM_REC) audio
+	$(HIDE)$(RM_REC) backends
+	$(HIDE)$(RM_REC) base
+	$(HIDE)$(RM_REC) common
+	$(HIDE)$(RM_REC) engines
+	$(HIDE)$(RM_REC) graphics
+	$(HIDE)$(RM_REC) gui
+	$(HIDE)$(RM_REC) image
+	$(HIDE)$(RM_REC) video
+	$(HIDE)$(RM_REC) math
+
+	$(HIDE)$(RM) scummvm.zip
+	$(HIDE)$(RM) $(TARGET_NAME)_libretro.info
+	$(HIDE)$(RM) $(TARGET)
 
 # Include the dependency tracking files.
 -include $(wildcard $(addsuffix /*.d,$(DEPDIRS)))
@@ -631,4 +632,4 @@ endif
 .PHONY: $(wildcard $(addsuffix /*.d,$(DEPDIRS))) $(addprefix $(CORE_DIR)/, $(addsuffix /module.mk,$(MODULES))) \
 	$(CORE_DIR)/$(port_mk) $(CORE_DIR)/rules.mk $(CORE_DIR)/engines/engines.mk
 
-.PHONY: all clean
+.PHONY: clean
