@@ -24,7 +24,7 @@ cd "${SRC_PATH}"
 
 # Retrieve all configure functions
 sed -i "s/exit 0/return 0/g" configure
-. configure -h > /dev/null
+. configure -h > /dev/null 2>&1
 
 # Collect all default engines dependencies and force to yes
 tot_deps=""
@@ -47,14 +47,13 @@ done
 [ $1 -eq 1 ] && _highres=no
 
 # Create needed engines build files
-awk -f "engines.awk" < /dev/null > /dev/null
+awk -f "engines.awk" < /dev/null > /dev/null 2>&1
 
 mkdir -p "engines"
 
 copy_if_changed engines/engines.mk.new "engines/engines.mk"
 copy_if_changed engines/detection_table.h.new "engines/detection_table.h"
 copy_if_changed engines/plugins_table.h.new "engines/plugins_table.h"
-#copy_if_changed engines/config.mk.engines "config.mk.engines"
 
 # Test NO_WIP
 [ $2 -ne 1 ] && sed -i "s/# \(.*\)/\1 = STATIC_PLUGIN/g" "config.mk.engines"

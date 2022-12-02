@@ -1,34 +1,21 @@
-LIBRETRO_DIR      = src
-DEPS_DIR          = $(LIBRETRO_DIR)/deps
-LIBRETRO_COMM_DIR = $(LIBRETRO_DIR)/libretro-common
-
-# Define enabled modules
-#
 # Following script automatically generates configuration engines files (build/config.mk.engines, engines/engines.mk, engines/plugins_table.h, engines/detection_table.h) from actual source in $(CORE_DIR).
 #
 # config.mk.engines.lite is a static file with a reduced set of engines for minimal builds
 
+ifeq (,$(filter clean,$(MAKECMDGOALS)))
 $(info Configuring ScummVM engines...)
 ifneq ($(shell cd $(BUILD_DIR); ./configure_engines.sh $(NO_HIGH_DEF) $(NO_WIP)),0)
-	E := $(error Error executing $(BUILD_DIR)/configure_engines.sh)
+   $(error Configuring ScummVM engines failed)
+endif
 endif
 
-$(info Bundling ScummVM Datafiles and themes...)
-ifneq ($(shell cd $(BUILD_DIR); ./bundle_datafiles.sh),0)
-	W := $(warning Error executing $(BUILD_DIR)/bundle_datafiles.sh)
-endif
-
-ifeq ($(LITE), 1)
-	include $(BUILD_DIR)/config.mk.engines.lite
-else
-	include $(CORE_DIR)/config.mk.engines
-endif
+######################################################################
+# Libretro settings
+######################################################################
 
 INCFLAGS    := -I$(LIBRETRO_DIR) -I$(CORE_DIR) -I$(DEPS_DIR) -I$(CORE_DIR)/engines -I$(LIBRETRO_COMM_DIR)/include -I$(LIBRETRO_COMM_DIR)/include/compat
-
 INCLUDES    += $(INCFLAGS)
 MODULE_DIRS += $(LIBRETRO_DIR)
-
 
 OBJS := $(LIBRETRO_DIR)/libretro.o \
 			$(LIBRETRO_DIR)/libretro_os.o \
@@ -45,7 +32,19 @@ else
 OBJS += $(LIBRETRO_DIR)/retro_emu_thread.o
 endif
 
-OBJS_DEPS :=
+ifneq ($(STATIC_LINKING), 1)
+OBJS_DEPS += $(LIBRETRO_COMM_DIR)/file/retro_dirent.o \
+			$(LIBRETRO_COMM_DIR)/file/retro_stat.o \
+			$(LIBRETRO_COMM_DIR)/file/file_path.o \
+			$(LIBRETRO_COMM_DIR)/encodings/encoding_utf.o \
+			$(LIBRETRO_COMM_DIR)/compat/fopen_utf8.o \
+			$(LIBRETRO_COMM_DIR)/compat/compat_strl.o
+endif
+
+
+######################################################################
+# External dependencies settings
+######################################################################
 
 ifeq ($(USE_FLUIDSYNTH), 1)
 DEFINES += -DUSE_FLUIDSYNTH -DUSE_FLUIDLITE
@@ -414,27 +413,14 @@ OBJS_DEPS += $(DEPS_DIR)/freetype/src/autofit/afangles.o \
 			$(DEPS_DIR)/freetype/src/winfonts/winfnt.o
 endif
 
-ifneq ($(STATIC_LINKING), 1)
-OBJS_DEPS += $(LIBRETRO_COMM_DIR)/file/retro_dirent.o \
-			$(LIBRETRO_COMM_DIR)/file/retro_stat.o \
-			$(LIBRETRO_COMM_DIR)/file/file_path.o \
-			$(LIBRETRO_COMM_DIR)/encodings/encoding_utf.o \
-			$(LIBRETRO_COMM_DIR)/compat/fopen_utf8.o \
-			$(LIBRETRO_COMM_DIR)/compat/compat_strl.o
-endif
-
-all: $(TARGET)
-
 ######################################################################
 # Module settings
 ######################################################################
 
-MODULES := test devtools base $(MODULES)
-
-include $(CORE_DIR)/engines/engines.mk
-
-# After the game specific modules follow the shared modules
-MODULES += \
+MODULES := \
+	test \
+	devtools \
+	base \
 	engines \
 	gui \
 	backends \
@@ -447,10 +433,29 @@ MODULES += \
 	po \
 	doc
 
-ifeq ($(USE_LUA),1)
-   MODULES += common/lua
-endif
-
 ifeq ($(USE_MT32EMU),1)
    MODULES += audio/softsynth/mt32
 endif
+
+ifeq ($(LITE), 1)
+   include $(BUILD_DIR)/config.mk.engines.lite
+else
+   include $(CORE_DIR)/config.mk.engines
+endif
+
+include $(CORE_DIR)/engines/engines.mk
+
+######################################################################
+# Rules
+######################################################################
+
+all: $(TARGET) scummvm.zip $(TARGET_NAME)_libretro.info
+
+#bundle_files
+scummvm.zip: $(CORE_DIR)/dists/scummvm.rc
+	@echo Preparing $@
+	@cd $(BUILD_DIR); ./bundle_datafiles.sh $(TARGET_NAME) "NA" "bundle"
+
+$(TARGET_NAME)_libretro.info: $(CORE_DIR)/dists/scummvm.rc
+	@echo Preparing $@
+	@cd $(BUILD_DIR); ./bundle_datafiles.sh $(TARGET_NAME) "ScummVM (mainline)" "info"

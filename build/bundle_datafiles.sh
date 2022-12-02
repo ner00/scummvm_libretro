@@ -28,19 +28,27 @@ firmware$1_opt = \"true\"
 function process_group(){
 	local dirname="$1"
 	shift
+	local target="$1"
+	shift
 	local arr=("$@")
 	for item in "${arr[@]}"; do
-		cp $item "${TMP_PATH}/${dirname}/"
+		[ $target = "bundle" ] && cp $item "${TMP_PATH}/${dirname}/"
 		fragment=$(get_firmware_entry $count $(echo "$item" | sed "s|^.*/||g") "$dirname")
 		CORE_INFO_DATS="$CORE_INFO_DATS $fragment"
 		count=$(expr $count + 1)
 	done
 }
 
+# Externally passed variables shall be:
+# $1 displayed core name (shown in frontend)
+# $2 target name (prefix for core info file)
+# $3 target build ("bundle" to build scummvm.zip, any other string to build core info file)
+
 # Set variables
 BUILD_PATH=$(pwd)
 SRC_PATH="${BUILD_PATH}/../scummvm"
 TMP_PATH="${BUILD_PATH}/tmp_data"
+TARGET_PATH="${BUILD_PATH}/.."
 BUNDLE_DIR="scummvm"
 BUNDLE_DATAFILES_DIR="${BUNDLE_DIR}/extra"
 BUNDLE_THEME_DIR="${BUNDLE_DIR}/theme"
@@ -48,8 +56,8 @@ BUNDLE_ZIP_FILE="${BUNDLE_DIR}.zip"
 BUNDLE_LOCAL_DATAFILES_DIR="${BUILD_PATH}/../dist"
 
 # Retrieve data file info from ScummVM source
-THEMES_LIST=$(cat "${SRC_PATH}/dists/scummvm.rc" | grep FILE.*gui/themes.*\.zip | sed "s|.*\"\(.*\)\"|${SRC_PATH}/\1|g")
-DATAFILES_LIST=$(cat "${SRC_PATH}/dists/scummvm.rc" | grep FILE.*dists/engine-data | sed "s|.*\"\(.*\)\"|${SRC_PATH}/\1|g")
+THEMES_LIST=$(cat "${SRC_PATH}/dists/scummvm.rc" 2>/dev/null | grep FILE.*gui/themes.*\.zip | sed "s|.*\"\(.*\)\"|${SRC_PATH}/\1|g")
+DATAFILES_LIST=$(cat "${SRC_PATH}/dists/scummvm.rc" 2>/dev/null| grep FILE.*dists/engine-data | sed "s|.*\"\(.*\)\"|${SRC_PATH}/\1|g")
 
 # Put retrieved data into arrays
 set +e
@@ -58,36 +66,37 @@ read -a DATAFILES_ARRAY -d '' -r <<< "$DATAFILES_LIST"
 set -e
 
 # Make sure target folders exist
-mkdir -p "${TMP_PATH}/${BUNDLE_THEME_DIR}/"
-mkdir -p "${TMP_PATH}/${BUNDLE_DATAFILES_DIR}/"
+[ $3 = "bundle" ] && mkdir -p "${TMP_PATH}/${BUNDLE_THEME_DIR}/"
+[ $3 = "bundle" ] && mkdir -p "${TMP_PATH}/${BUNDLE_DATAFILES_DIR}/"
 
 count=0
 # Process themes
-	process_group "$BUNDLE_THEME_DIR" ${THEME_ARRAY[@]}
+	process_group "$BUNDLE_THEME_DIR" $3 ${THEME_ARRAY[@]}
 
 # Process datafiles
-	process_group "$BUNDLE_DATAFILES_DIR" ${DATAFILES_ARRAY[@]}
+	process_group "$BUNDLE_DATAFILES_DIR" $3 ${DATAFILES_ARRAY[@]}
 
 # Process additional local bundle files
 if [ -d "$BUNDLE_LOCAL_DATAFILES_DIR" -a ! -z "$(ls -A ${BUNDLE_LOCAL_DATAFILES_DIR} 2>/dev/null)" ] ; then
 	for item in $BUNDLE_LOCAL_DATAFILES_DIR/*; do
 		[ ! $(echo "$item" | sed "s|^.*/||g") = "README.md" ] && LOCAL_EXTRA_ARRAY+=("$item")
 	done
-	process_group "$BUNDLE_DATAFILES_DIR" ${LOCAL_EXTRA_ARRAY[@]}
+	process_group "$BUNDLE_DATAFILES_DIR" $3 ${LOCAL_EXTRA_ARRAY[@]}
 fi
 
-# Create core.info file
-set +e
-read -d '' CORE_INFO_CONTENT <<EOF
+if [ ! $3 = "bundle" ]; then
+	# Create core.info file
+	set +e
+	read -d '' CORE_INFO_CONTENT <<EOF
 # Software Information
-display_name = "ScummVM"
+display_name = "$2"
 authors = "SCUMMVMdev"
 supported_extensions = "scummvm"
-corename = "ScummVM"
+corename = "$2"
 categories = "Game"
-license = "GPLv2"
+license = "GPLv3"
 permissions = ""
-display_version = $(cat $SRC_PATH/base/internal_version.h | grep SCUMMVM_VERSION | sed "s|^.*SCUMMVM_VERSION *||g")
+display_version = $(cat $SRC_PATH/base/internal_version.h 2>/dev/null | grep SCUMMVM_VERSION | sed "s|^.*SCUMMVM_VERSION *||g")
 
 # Hardware Information
 manufacturer = "Various"
@@ -115,15 +124,20 @@ is_experimental = "false"
 firmware_count = $count
 
 EOF
-set -e
+	set -e
 
-CORE_INFO_CONTENT="$CORE_INFO_CONTENT $CORE_INFO_DATS"
-echo "$CORE_INFO_CONTENT" > "$BUILD_PATH/scummvm_libretro.info"
+	CORE_INFO_CONTENT="$CORE_INFO_CONTENT $CORE_INFO_DATS"
+	echo "$CORE_INFO_CONTENT" > "${TARGET_PATH}/${1}_libretro.info"
+	echo "${1}_libretro.info created successfully"
+else
 
-# Create archive
-zip -rq "${BUILD_PATH}/$BUNDLE_ZIP_FILE" "$TMP_PATH/$BUNDLE_DIR"
+	# Create archive
+	rm -f "${TARGET_PATH}/$BUNDLE_ZIP_FILE"
+	cd "${TMP_PATH}"
+	zip -rq "${TARGET_PATH}/$BUNDLE_ZIP_FILE" "${BUNDLE_DIR}" > /dev/null 2>&1
+	cd - > /dev/null
 
-# Remove temporary directories
-rm -rf "$TMP_PATH"
-
-echo 0
+	# Remove temporary directories
+	rm -rf "$TMP_PATH"
+	echo "$BUNDLE_ZIP_FILE created successfully"
+fi
