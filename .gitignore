@@ -1,5 +1,5 @@
 *.o
 *.a
-/engines/detection_table.h
-/engines/plugins_table.h
-/engines/engines.mk
+scummvm.zip
+*_libretro.so
+*_libretro.info
