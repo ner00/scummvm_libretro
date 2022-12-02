@@ -28,7 +28,7 @@ VPATH               := $(CORE_DIR)
 DEPS_DIR            := $(LIBRETRO_DIR)/deps
 LIBRETRO_COMM_DIR   := $(LIBRETRO_DIR)/libretro-common
 
-TARGET_NAME = scummvm-mainline
+TARGET_NAME = scummvm_mainline
 GIT_VERSION := $(shell cd $(CORE_DIR); git rev-parse --short HEAD || echo unknown)
 
 TARGET_64BIT = 0
