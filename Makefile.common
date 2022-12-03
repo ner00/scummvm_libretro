@@ -454,8 +454,8 @@ all: $(TARGET) scummvm.zip $(TARGET_NAME)_libretro.info
 #bundle_files
 scummvm.zip: $(CORE_DIR)/dists/scummvm.rc
 	@echo Preparing $@
-	@cd $(BUILD_DIR); ./bundle_datafiles.sh $(TARGET_NAME) "NA" "bundle"
+	@cd $(BUILD_DIR); ./bundle_datafiles.sh bundle $(TARGET_NAME)
 
 $(TARGET_NAME)_libretro.info: $(CORE_DIR)/dists/scummvm.rc
 	@echo Preparing $@
-	@cd $(BUILD_DIR); ./bundle_datafiles.sh $(TARGET_NAME) "ScummVM (mainline)" "info"
+	@cd $(BUILD_DIR); ./bundle_datafiles.sh info $(TARGET_NAME) $(CORE_NAME) $(CORE_EXTENSIONS)

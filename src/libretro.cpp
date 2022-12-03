@@ -115,7 +115,7 @@ unsigned retro_api_version(void)
 
 void retro_get_system_info(struct retro_system_info *info)
 {
-   info->library_name = "scummvm";
+   info->library_name = CORE_NAME;
 #ifndef GIT_VERSION
 #define GIT_VERSION ""
 #endif
@@ -183,7 +183,7 @@ void parse_command_params(char* cmdline)
             {
                if(i != j && !quotes)
                {
-                  cmdline[i] = '\0';                        
+                  cmdline[i] = '\0';
                   strcpy(cmd_params[cmd_params_num],cmdline+j);
                   cmd_params_num++;
                }

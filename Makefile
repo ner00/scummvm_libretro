@@ -28,8 +28,14 @@ VPATH               := $(CORE_DIR)
 DEPS_DIR            := $(LIBRETRO_DIR)/deps
 LIBRETRO_COMM_DIR   := $(LIBRETRO_DIR)/libretro-common
 
+# output files prefix
 TARGET_NAME = scummvm_mainline
+# core version shown in frontend
 GIT_VERSION := $(shell cd $(CORE_DIR); git rev-parse --short HEAD || echo unknown)
+# nice name shown in frontend
+CORE_NAME = "ScummVM mainline"
+# pipe separated allowed extensions
+CORE_EXTENSIONS = "scummvm"
 
 TARGET_64BIT = 0
 
@@ -462,6 +468,8 @@ else
    LDFLAGS += -lpthread
 endif
 
+DEFINES += -DCORE_NAME=\"$(CORE_NAME)\"
+DEFINES += -DCORE_EXTENSIONS=\"$(CORE_EXTENSIONS)\"
 ifneq ($(GIT_VERSION),unknown)
 	DEFINES += -DGIT_VERSION=\"$(GIT_VERSION)\"
 endif

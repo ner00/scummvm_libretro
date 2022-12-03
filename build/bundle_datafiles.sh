@@ -40,9 +40,10 @@ function process_group(){
 }
 
 # Externally passed variables shall be:
-# $1 displayed core name (shown in frontend)
-# $2 target name (prefix for core info file)
-# $3 target build ("bundle" to build scummvm.zip, any other string to build core info file)
+# $1 [REQ] target build ("bundle" to build scummvm.zip, any other string to build core info file)
+# $2 [OPT] target name (prefix for core info file)
+# $3 [OPT] displayed core name (shown in frontend)
+# $4 [OPT] allowed extensions
 
 # Set variables
 BUILD_PATH=$(pwd)
@@ -66,33 +67,33 @@ read -a DATAFILES_ARRAY -d '' -r <<< "$DATAFILES_LIST"
 set -e
 
 # Make sure target folders exist
-[ $3 = "bundle" ] && mkdir -p "${TMP_PATH}/${BUNDLE_THEME_DIR}/"
-[ $3 = "bundle" ] && mkdir -p "${TMP_PATH}/${BUNDLE_DATAFILES_DIR}/"
+[ $1 = "bundle" ] && mkdir -p "${TMP_PATH}/${BUNDLE_THEME_DIR}/"
+[ $1 = "bundle" ] && mkdir -p "${TMP_PATH}/${BUNDLE_DATAFILES_DIR}/"
 
 count=0
 # Process themes
-	process_group "$BUNDLE_THEME_DIR" $3 ${THEME_ARRAY[@]}
+	process_group "$BUNDLE_THEME_DIR" $1 ${THEME_ARRAY[@]}
 
 # Process datafiles
-	process_group "$BUNDLE_DATAFILES_DIR" $3 ${DATAFILES_ARRAY[@]}
+	process_group "$BUNDLE_DATAFILES_DIR" $1 ${DATAFILES_ARRAY[@]}
 
 # Process additional local bundle files
 if [ -d "$BUNDLE_LOCAL_DATAFILES_DIR" -a ! -z "$(ls -A ${BUNDLE_LOCAL_DATAFILES_DIR} 2>/dev/null)" ] ; then
 	for item in $BUNDLE_LOCAL_DATAFILES_DIR/*; do
 		[ ! $(echo "$item" | sed "s|^.*/||g") = "README.md" ] && LOCAL_EXTRA_ARRAY+=("$item")
 	done
-	process_group "$BUNDLE_DATAFILES_DIR" $3 ${LOCAL_EXTRA_ARRAY[@]}
+	process_group "$BUNDLE_DATAFILES_DIR" $1 ${LOCAL_EXTRA_ARRAY[@]}
 fi
 
-if [ ! $3 = "bundle" ]; then
+if [ ! $1 = "bundle" ]; then
 	# Create core.info file
 	set +e
 	read -d '' CORE_INFO_CONTENT <<EOF
 # Software Information
-display_name = "$2"
+display_name = "$3"
 authors = "SCUMMVMdev"
-supported_extensions = "scummvm"
-corename = "$2"
+supported_extensions = "$4"
+corename = "$3"
 categories = "Game"
 license = "GPLv3"
 permissions = ""
@@ -127,8 +128,8 @@ EOF
 	set -e
 
 	CORE_INFO_CONTENT="$CORE_INFO_CONTENT $CORE_INFO_DATS"
-	echo "$CORE_INFO_CONTENT" > "${TARGET_PATH}/${1}_libretro.info"
-	echo "${1}_libretro.info created successfully"
+	echo "$CORE_INFO_CONTENT" > "${TARGET_PATH}/${2}_libretro.info"
+	echo "${2}_libretro.info created successfully"
 else
 
 	# Create archive
