@@ -417,10 +417,18 @@ endif
 # Module settings
 ######################################################################
 
-MODULES := \
-	test \
-	devtools \
-	base \
+MODULES := test devtools base $(MODULES)
+
+ifeq ($(LITE), 1)
+   include $(BUILD_DIR)/config.mk.engines.lite
+else
+   include $(CORE_DIR)/config.mk.engines
+endif
+
+include $(CORE_DIR)/engines/engines.mk
+
+# After the game specific modules follow the shared modules
+MODULES += \
 	engines \
 	gui \
 	backends \
@@ -436,14 +444,6 @@ MODULES := \
 ifeq ($(USE_MT32EMU),1)
    MODULES += audio/softsynth/mt32
 endif
-
-ifeq ($(LITE), 1)
-   include $(BUILD_DIR)/config.mk.engines.lite
-else
-   include $(CORE_DIR)/config.mk.engines
-endif
-
-include $(CORE_DIR)/engines/engines.mk
 
 ######################################################################
 # Rules
