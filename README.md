@@ -12,7 +12,7 @@ As current official ScummVM libretro core is based on a very old fork of ScummVM
 ## Build
 To build with the default configuration type in a shell the following:
 ```
-git clone https://github.com/spleen1981/scummvm-mainline-libretro
+git clone --recursive https://github.com/spleen1981/scummvm-mainline-libretro
 cd scummvm-mainline-libretro
 make
 ```
@@ -22,6 +22,6 @@ make
 All options and configuration of the legacy libretro core are applicable to this one as well, refer to relevant link in Resources.
 
 ## Resources
-For official ScummVM repositorory readme ref. [here](https://github.com/scummvm/scummvm#readme).
+For official ScummVM repository readme ref. [here](https://github.com/scummvm/scummvm#readme).
 
 Legacy ScummVM libretro core documentation is [here](https://github.com/scummvm/scummvm#readme)
