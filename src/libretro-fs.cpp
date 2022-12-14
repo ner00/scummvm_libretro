@@ -32,9 +32,9 @@
 #include "backends/fs/stdiostream.h"
 #include "common/algorithm.h"
 
-#include "libretro-common/include/retro_dirent.h"
-#include "libretro-common/include/retro_stat.h"
-#include "libretro-common/include/file/file_path.h"
+#include "retro_dirent.h"
+#include "retro_stat.h"
+#include "file/file_path.h"
 #include <stdio.h>
 #include <errno.h>
 #include <fcntl.h>
