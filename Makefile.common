@@ -13,8 +13,7 @@ endif
 # Libretro settings
 ######################################################################
 
-INCFLAGS    := -I$(LIBRETRO_DIR) -I$(CORE_DIR) -I$(DEPS_DIR) -I$(CORE_DIR)/engines -I$(LIBRETRO_COMM_DIR)/include -I$(LIBRETRO_COMM_DIR)/include/compat
-INCLUDES    += $(INCFLAGS)
+INCLUDES    += -I$(LIBRETRO_DIR) -I$(CORE_DIR) -I$(DEPS_DIR) -I$(CORE_DIR)/engines -I$(LIBRETRO_COMM_DIR)/include -I$(LIBRETRO_COMM_DIR)/include/compat
 MODULE_DIRS += $(LIBRETRO_DIR)
 
 OBJS := $(LIBRETRO_DIR)/libretro.o \

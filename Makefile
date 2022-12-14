@@ -322,6 +322,7 @@ else ifneq (,$(findstring hardfloat,$(platform)))
    DEFINES += -mfloat-abi=hard
 endif
    DEFINES += -DARM
+
 # Odroid Go Advance
 else ifneq (,$(findstring oga_a35_neon_hardfloat,$(platform)))
    TARGET := $(TARGET_NAME)_libretro.so
@@ -520,7 +521,7 @@ include Makefile.common
 ######################################################################
 
 # Concat DEFINES and INCLUDES to form the CPPFLAGS
-CPPFLAGS := $(DEFINES) $(INCLUDES) $(INCFLAGS)
+CPPFLAGS := $(DEFINES) $(INCLUDES)
 CXXFLAGS += $(DEFINES) $(INCLUDES)
 CFLAGS += $(DEFINES) $(INCLUDES)
 
