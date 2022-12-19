@@ -28,9 +28,9 @@ OBJS_DEPS += $(LIBRETRO_COMM_DIR)/file/file_path_io.o \
 	$(LIBRETRO_COMM_DIR)/file/retro_dirent.o
 
 ifeq ($(USE_LIBCO), 1)
-OBJS += $(LIBRETRO_COMM_DIR)/libco/libco.o
+OBJS_DEPS += $(LIBRETRO_COMM_DIR)/libco/libco.o
 ifeq ($(platform), genode)
-OBJS += $(LIBRETRO_COMM_DIR)/libco/genode.o
+OBJS_DEPS += $(LIBRETRO_COMM_DIR)/libco/genode.o
 endif
 endif
 
