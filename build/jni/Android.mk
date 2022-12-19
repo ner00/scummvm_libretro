@@ -25,7 +25,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE          := retro
 LOCAL_MODULE_FILENAME := scummvm_mainline_libretro
 LOCAL_SRC_FILES       := $(DETECT_OBJS:%.o=$(CORE_DIR)/%.cpp)  $(OBJS_DEPS:%.o=%.c) $(OBJS_MODULES:%.o=%.cpp) $(OBJS:%.o=%.cpp)
-LOCAL_C_INCLUDES      := $(INCLUDES)
+LOCAL_C_INCLUDES      := $(subst -I,,$(INCLUDES))
 LOCAL_CPPFLAGS        := $(COREFLAGS) -std=c++11
 LOCAL_CFLAGS          := $(COREFLAGS)
 LOCAL_LDFLAGS         := -Wl,-version-script=$(BUILD_DIR)/link.T
