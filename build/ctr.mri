@@ -1,4 +1,4 @@
-CREATE scummvm_libretro_ctr.a
+CREATE scummvm_mainline_libretro_ctr.a
 ADDLIB libtemp/libagi.a
 ADDLIB libtemp/libagos.a
 ADDLIB libtemp/libaudio.a
@@ -43,6 +43,7 @@ ADDLIB libtemp/libxeen.a
 ADDMOD libtemp/libco.o
 ADDMOD libtemp/libretro.o
 ADDMOD libtemp/libretro_os.o
-ADDMOD libtemp/retro_stat.o
+ADDMOD libtemp/file_path.o
+ADDMOD libtemp/file_path_io.o
 SAVE
 END
