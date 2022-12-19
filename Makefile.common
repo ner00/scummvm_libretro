@@ -61,6 +61,12 @@ else
    LDFLAGS += -lpthread
 endif
 
+ifeq ($(TARGET_64BIT), 1)
+   DEFINES += -DSIZEOF_SIZE_T=8 -DSCUMM_64BITS
+else
+   DEFINES += -DSIZEOF_SIZE_T=4
+endif
+
 ######################################################################
 # Libretro settings
 ######################################################################

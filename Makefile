@@ -1,9 +1,7 @@
 ROOT_PATH := .
 
-# output files prefix
+# Output files prefix
 TARGET_NAME = scummvm_mainline
-
-TARGET_64BIT = 0
 
 HIDE := @
 SPACE :=
@@ -39,17 +37,12 @@ ifeq ($(shell uname -a),)
    EXE_EXT = .exe
 endif
 
-ifeq ($(BUILD_64BIT),)
-ifeq ($(shell uname -m), x86_64)
-   BUILD_64BIT = 1
-else ifeq ($(shell uname -m), arm64)
-   BUILD_64BIT = 1
-else ifeq ($(shell uname -m), aarch64)
-   BUILD_64BIT = 1
+ifeq ($(filter $(shell uname -m),64),64)
+   BUILD_64BIT := 1
 else
-   BUILD_64BIT = 0
+   BUILD_64BIT := 0
 endif
-endif
+TARGET_64BIT := $(BUILD_64BIT)
 
 LD        = $(CXX)
 AR        = ar cru
@@ -60,7 +53,6 @@ ifeq ($(platform), unix)
    TARGET  := $(TARGET_NAME)_libretro.so
    DEFINES += -fPIC
    LDFLAGS += -shared -Wl,--version-script=$(BUILD_DIR)/link.T -fPIC
-   TARGET_64BIT := $(BUILD_64BIT)
    CXXFLAGS := -std=c++11
    DEFINES += -DUSE_CXX11
 
@@ -92,7 +84,6 @@ else ifeq ($(platform), osx)
    DEFINES += -fPIC -Wno-undefined-var-template -Wno-pragma-pack
    LDFLAGS += -dynamiclib -fPIC
    DEFINES += -DHAVE_POSIX_MEMALIGN=1
-   TARGET_64BIT := $(BUILD_64BIT)
    CXXFLAGS := -std=c++11
    DEFINES += -DUSE_CXX11
 
@@ -102,8 +93,6 @@ else ifeq ($(platform), osx)
 	CPPFLAGS += $(TARGET_RULE)
 	CXXFLAGS += $(TARGET_RULE)
 	LDFLAGS  += $(TARGET_RULE)
-	# Hardcode TARGET_64BIT for now
-	TARGET_64BIT = 1
    endif
 
 # iOS
@@ -157,7 +146,6 @@ else ifeq ($(platform), qnx)
 # Genode
 else ifeq ($(platform), genode)
    TARGET  := libretro.so
-   TARGET_64BIT := $(BUILD_64BIT)
    DEFINES += -fPIC -DSYSTEM_NOT_SUPPORTING_D_TYPE -DFRONTEND_SUPPORTS_RGB565
    C_PKGS   = libc
    CXX_PKGS = stdcxx genode-base
@@ -434,7 +422,6 @@ else ifneq (,$(findstring windows_msvc2017,$(platform)))
 
 else
 	CC ?= gcc
-	TARGET_64BIT := $(BUILD_64BIT)
 	TARGET  := $(TARGET_NAME)_libretro.dll
 	DEFINES += -DHAVE_FSEEKO -DHAVE_INTTYPES_H -fPIC
 	CXXFLAGS += -fno-permissive

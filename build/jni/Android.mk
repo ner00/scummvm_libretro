@@ -1,8 +1,13 @@
 LOCAL_PATH := $(call my-dir)
-ROOT_PATH := $(LOCAL_PATH)/../..
+ROOT_PATH  := $(LOCAL_PATH)/../..
 
 # Reset flags not reset to  Makefile.common
 DEFINES   :=
+
+# All current 64-bit archs have 64 in the abi name
+ifeq ($(filter $(TARGET_ARCH_ABI),64),64)
+  TARGET_64BIT := 1
+endif
 
 include $(ROOT_PATH)/Makefile.common
 
@@ -14,13 +19,6 @@ COREFLAGS += -Wno-multichar -Wno-undefined-var-template -Wno-pragma-pack
 
 ifeq ($(TARGET_ARCH),arm)
   COREFLAGS += -D_ARM_ASSEM_
-endif
-
-# All current 64-bit archs have 64 in the abi name
-ifeq ($(filter $(TARGET_ARCH_ABI),64),64)
-  COREFLAGS += -DSIZEOF_SIZE_T=8
-else
-  COREFLAGS += -DSIZEOF_SIZE_T=4
 endif
 
 include $(CLEAR_VARS)
