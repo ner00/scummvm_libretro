@@ -63,6 +63,29 @@ ifeq ($(platform), unix)
    TARGET_64BIT := $(BUILD_64BIT)
    CXXFLAGS := -std=c++11
    DEFINES += -DUSE_CXX11
+
+# Raspberry Pi 3 (64 bit)
+else ifeq ($(platform), rpi3_64)
+   TARGET = $(TARGET_NAME)_libretro.so
+   DEFINES += -fPIC -Wno-multichar -D_ARM_ASSEM_ -DUSE_CXX11 -DARM
+   CFLAGS += -fPIC
+   LDFLAGS += -shared -Wl,--version-script=$(BUILD_DIR)/link.T -fPIC
+   CFLAGS += -mcpu=cortex-a53 -mtune=cortex-a53
+   CFLAGS += -fomit-frame-pointer -ffast-math
+   CXXFLAGS = $(CFLAGS) -frtti
+   BUILD_64BIT = 1
+
+# Raspberry Pi 4 (64 bit)
+else ifeq ($(platform), rpi4_64)
+   TARGET = $(TARGET_NAME)_libretro.so
+   DEFINES += -fPIC -Wno-multichar -D_ARM_ASSEM_ -DUSE_CXX11 -DARM
+   CFLAGS += -fPIC
+   LDFLAGS += -shared -Wl,--version-script=$(BUILD_DIR)/link.T -fPIC
+   CFLAGS += -mcpu=cortex-a72 -mtune=cortex-a72
+   CFLAGS += -fomit-frame-pointer -ffast-math
+   CXXFLAGS = $(CFLAGS) -frtti -std=c++11
+   BUILD_64BIT = 1
+
 # OS X
 else ifeq ($(platform), osx)
    TARGET  := $(TARGET_NAME)_libretro.dylib
@@ -242,16 +265,23 @@ else ifeq ($(platform), gcw0)
    HAVE_MT32EMU = 0
    NO_HIGH_DEF := 1
 
-# Raspberry Pi 4
-else ifneq (,$(findstring rpi4,$(platform)))
+# MIYOO
+else ifeq ($(platform), miyoo)
    TARGET := $(TARGET_NAME)_libretro.so
-   TARGET_64BIT := $(BUILD_64BIT)
-   DEFINES += -fPIC -Wno-multichar -D_ARM_ASSEM_
-   LDFLAGS += -shared -Wl,--version-script=$(BUILD_DIR)/link.T -fPIC
-   DEFINES += -mcpu=cortex-a72
-   CXXFLAGS := -std=c++11
-   DEFINES += -DUSE_CXX11
-   DEFINES += -DARM
+   CC = /opt/miyoo/usr/bin/arm-linux-gcc
+   CXX = /opt/miyoo/usr/bin/arm-linux-g++
+   LD = /opt/miyoo/usr/bin/arm-linux-g++
+   AR = /opt/miyoo/usr/bin/arm-linux-ar cru
+   RANLIB = /opt/miyoo/usr/bin/arm-linux-ranlib
+   DEFINES += -DDINGUX -fomit-frame-pointer -ffast-math -march=armv5te -mtune=arm926ej-s -fPIC
+   DEFINES += -ffunction-sections -fdata-sections
+   LDFLAGS += -shared -Wl,--gc-sections -Wl,--version-script=../link.T -fPIC
+   USE_VORBIS = 0
+   USE_THEORADEC = 0
+   USE_TREMOR = 1
+   USE_LIBCO  = 0
+   HAVE_MT32EMU = 0
+   NO_HIGH_DEF := 1
 
 else ifeq ($(platform), android-armv7)
    TARGET  := $(TARGET_NAME)_libretro_android.so
@@ -290,7 +320,7 @@ endif
    DEFINES += -DARM
 
 # Odroid Go Advance
-else ifneq (,$(findstring oga_a35_neon_hardfloat,$(platform)))
+else ifeq (,$(findstring oga_a35_neon_hardfloat,$(platform)))
    TARGET := $(TARGET_NAME)_libretro.so
    DEFINES += -fPIC -Wno-multichar -D_ARM_ASSEM_
    LDFLAGS += -shared -Wl,--version-script=$(BUILD_DIR)/link.T -fPIC
