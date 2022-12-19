@@ -46,15 +46,14 @@ USE_BINK        = 1
 POSIX          := 1
 NO_HIGH_DEF     = 0
 NO_WIP         ?= 1
+USE_LIBCO      := 1
 #BACKEND       := libretro
 
 include $(ROOT_PATH)/Makefile.common
 include $(addprefix $(CORE_DIR)/, $(addsuffix /module.mk,$(MODULES)))
 OBJS_MODULES := $(addprefix $(CORE_DIR)/, $(foreach MODULE,$(MODULES),$(MODULE_OBJS-$(MODULE))))
-SOURCES_C    := $(LIBRETRO_COMM_DIR)/libco/libco.c
-SOURCES_CXX  := $(LIBRETRO_DIR)/libretro.cpp $(LIBRETRO_DIR)/libretro_os.cpp $(LIBRETRO_DIR)/libretro-fs.cpp $(LIBRETRO_DIR)/libretro-fs-factory.cpp
 
-COREFLAGS := $(DEFINES) $(INCLUDES) -D__LIBRETRO__ -DNONSTANDARD_PORT -DUSE_RGB_COLOR -DUSE_OSD -DDISABLE_TEXT_CONSOLE -DFRONTEND_SUPPORTS_RGB565 -DUSE_LIBCO  -DUSE_TRANSLATION -DDETECTION_STATIC -DHAVE_CONFIG_H -DUSE_BINK -DUSE_CXX11 -DUSE_TINYGL
+COREFLAGS := $(DEFINES) -D__LIBRETRO__ -DNONSTANDARD_PORT -DUSE_RGB_COLOR -DUSE_OSD -DDISABLE_TEXT_CONSOLE -DFRONTEND_SUPPORTS_RGB565 -DUSE_LIBCO  -DUSE_TRANSLATION -DDETECTION_STATIC -DHAVE_CONFIG_H -DUSE_BINK -DUSE_CXX11 -DUSE_TINYGL
 COREFLAGS += -Wno-multichar -Wno-undefined-var-template -Wno-pragma-pack
 
 ifeq ($(TARGET_ARCH),arm)
@@ -78,7 +77,8 @@ endif
 
 include $(CLEAR_VARS)
 LOCAL_MODULE       := retro
-LOCAL_SRC_FILES    := $(SOURCES_C) $(SOURCES_CXX) $(DETECT_OBJS:%.o=$(CORE_DIR)/%.cpp)  $(OBJS_DEPS:%.o=%.c) $(OBJS_MODULES:%.o=%.cpp)
+LOCAL_SRC_FILES    := $(DETECT_OBJS:%.o=$(CORE_DIR)/%.cpp)  $(OBJS_DEPS:%.o=%.c) $(OBJS_MODULES:%.o=%.cpp) $(OBJS:%.o=%.cpp)
+LOCAL_C_INCLUDES   := $(INCLUDES)
 LOCAL_CPPFLAGS     := $(COREFLAGS) -std=c++11
 LOCAL_CFLAGS       := $(COREFLAGS)
 LOCAL_LDFLAGS      := -Wl,-version-script=$(BUILD_DIR)/link.T
