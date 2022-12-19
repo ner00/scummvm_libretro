@@ -1,41 +1,7 @@
-DEBUG          = 0
-USE_ZLIB       = 1
-USE_TREMOR     = 0
-USE_VORBIS     = 1
-USE_FLAC       = 1
-USE_MAD        = 1
-USE_FAAD       = 1
-USE_PNG        = 1
-USE_JPEG       = 1
-USE_THEORADEC  = 1
-USE_FREETYPE2  = 1
-HAVE_MT32EMU   = 1
-USE_FLUIDSYNTH = 1
-USE_LUA        = 1
-USE_LIBCO      = 1
-LOAD_RULES_MK  = 1
-USE_TINYGL     = 1
-USE_BINK       = 1
-NO_HIGH_DEF    = 0
-LITE           = 0
-NO_WIP        ?= 1
-
-CORE_DIR            = scummvm
-BUILD_DIR           = build
-LIBRETRO_DIR        = src
-srcdir              := $(CORE_DIR)
-VPATH               := $(CORE_DIR)
-DEPS_DIR            := libretro-deps
-LIBRETRO_COMM_DIR   := libretro-common
+ROOT_PATH := .
 
 # output files prefix
 TARGET_NAME = scummvm_mainline
-# core version shown in frontend
-GIT_VERSION := $(shell cd $(CORE_DIR); git rev-parse --short HEAD || echo unknown)
-# nice name shown in frontend
-CORE_NAME = "ScummVM mainline"
-# pipe separated allowed extensions
-CORE_EXTENSIONS = "scummvm"
 
 TARGET_64BIT = 0
 
@@ -463,18 +429,6 @@ else
    DEFINES += -DSIZEOF_SIZE_T=4
 endif
 
-ifeq ($(USE_LIBCO), 1)
-   DEFINES += -DUSE_LIBCO
-else
-   LDFLAGS += -lpthread
-endif
-
-DEFINES += -DCORE_NAME=\"$(CORE_NAME)\"
-DEFINES += -DCORE_EXTENSIONS=\"$(CORE_EXTENSIONS)\"
-ifneq ($(GIT_VERSION),unknown)
-	DEFINES += -DGIT_VERSION=\"$(GIT_VERSION)\"
-endif
-
 # Define toolset
 ifdef TOOLSET
     CC        = $(TOOLSET)gcc
@@ -505,10 +459,7 @@ CXXFLAGS += -std=c++11
 LIBS += -lwinmm
 endif
 
-#BACKEND := libretro
-DETECT_OBJS :=
-
-include Makefile.common
+include $(ROOT_PATH)/Makefile.common
 
 ######################################################################
 # The build rules follow - normally you should have no need to

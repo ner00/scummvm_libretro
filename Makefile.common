@@ -1,4 +1,65 @@
-INCLUDES    += -I$(CORE_DIR)
+######################################################################
+# Common settings and defaults
+######################################################################
+
+# Reset flags (DEFINES not reset as used in Makefile)
+INCLUDES    :=
+OBJS_DEPS   :=
+OBJS        :=
+DETECT_OBJS :=
+MODULES     :=
+$(foreach MODULE,$(MODULES),$(MODULE_OBJS-$(MODULE)) :=)
+
+# Defaults
+USE_ZLIB       ?= 1
+USE_TREMOR     ?= 0
+USE_VORBIS     ?= 1
+USE_FLAC       ?= 1
+USE_MAD        ?= 1
+USE_FAAD       ?= 1
+USE_PNG        ?= 1
+USE_JPEG       ?= 1
+USE_THEORADEC  ?= 1
+USE_FREETYPE2  ?= 1
+HAVE_MT32EMU   ?= 1
+USE_FLUIDSYNTH ?= 1
+USE_LUA        ?= 1
+USE_LIBCO      ?= 1
+LOAD_RULES_MK  ?= 1
+USE_TINYGL     ?= 1
+USE_BINK       ?= 1
+POSIX          ?= 1
+NO_HIGH_DEF    ?= 0
+NO_WIP         ?= 1
+USE_LIBCO      ?= 1
+
+# Paths
+CORE_DIR            := $(ROOT_PATH)/scummvm
+BUILD_DIR           := $(ROOT_PATH)/build
+LIBRETRO_DIR        := $(ROOT_PATH)/src
+DEPS_DIR            := $(ROOT_PATH)/libretro-deps
+LIBRETRO_COMM_DIR   := $(ROOT_PATH)/libretro-common
+srcdir              := $(CORE_DIR)
+VPATH               := $(CORE_DIR)
+
+# Core version shown in frontend
+GIT_VERSION := $(shell cd $(CORE_DIR); git rev-parse --short HEAD || echo unknown)
+# Nice name shown in frontend
+CORE_NAME = "ScummVM mainline"
+# Pipe separated allowed file extensions that core can handle
+CORE_EXTENSIONS = "scummvm"
+
+INCLUDES += -I$(CORE_DIR)
+DEFINES  += -DCORE_NAME=\"$(CORE_NAME)\" -DCORE_EXTENSIONS=\"$(CORE_EXTENSIONS)\"
+ifneq ($(GIT_VERSION),unknown)
+	DEFINES += -DGIT_VERSION=\"$(GIT_VERSION)\"
+endif
+
+ifeq ($(USE_LIBCO), 1)
+   DEFINES += -DUSE_LIBCO
+else
+   LDFLAGS += -lpthread
+endif
 
 ######################################################################
 # Libretro settings
