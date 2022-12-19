@@ -32,9 +32,9 @@
 #include "backends/fs/stdiostream.h"
 #include "common/algorithm.h"
 
-#include "libretro-common/include/retro_dirent.h"
-#include "libretro-common/include/retro_stat.h"
-#include "libretro-common/include/file/file_path.h"
+#include "retro_dirent.h"
+#include "retro_stat.h"
+#include "file/file_path.h"
 #include <stdio.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -162,7 +162,7 @@ Common::SeekableWriteStream *LibRetroFilesystemNode::createWriteStream() {
 }
 
 bool LibRetroFilesystemNode::createDirectory() {
-	if (mkdir_norecurse(_path.c_str()))
+	if (path_mkdir(_path.c_str()))
 		setFlags();
 
 	return _isValid && _isDirectory;
@@ -209,7 +209,7 @@ bool assureDirectoryExists(const Common::String &dir, const char *prefix) {
 			*cur = '\0';
 		}
 
-		if (!mkdir_norecurse(path.c_str())) {
+		if (!path_mkdir(path.c_str())) {
 			if (errno == EEXIST) {
 				if (!path_is_valid(path.c_str())) {
 					return false;

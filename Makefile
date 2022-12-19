@@ -1,43 +1,7 @@
-DEBUG          = 0
-USE_ZLIB       = 1
-USE_TREMOR     = 0
-USE_VORBIS     = 1
-USE_FLAC       = 1
-USE_MAD        = 1
-USE_FAAD       = 1
-USE_PNG        = 1
-USE_JPEG       = 1
-USE_THEORADEC  = 1
-USE_FREETYPE2  = 1
-HAVE_MT32EMU   = 1
-USE_FLUIDSYNTH = 1
-USE_LUA        = 1
-USE_LIBCO      = 1
-LOAD_RULES_MK  = 1
-USE_TINYGL     = 1
-USE_BINK       = 1
-NO_HIGH_DEF    = 0
-LITE           = 0
-NO_WIP        ?= 1
+ROOT_PATH := .
 
-CORE_DIR            = scummvm
-BUILD_DIR           = build
-LIBRETRO_DIR        = src
-srcdir              := $(CORE_DIR)
-VPATH               := $(CORE_DIR)
-DEPS_DIR            := $(LIBRETRO_DIR)/deps
-LIBRETRO_COMM_DIR   := $(LIBRETRO_DIR)/libretro-common
-
-# output files prefix
+# Output files prefix
 TARGET_NAME = scummvm_mainline
-# core version shown in frontend
-GIT_VERSION := $(shell cd $(CORE_DIR); git rev-parse --short HEAD || echo unknown)
-# nice name shown in frontend
-CORE_NAME = "ScummVM mainline"
-# pipe separated allowed extensions
-CORE_EXTENSIONS = "scummvm"
-
-TARGET_64BIT = 0
 
 HIDE := @
 SPACE :=
@@ -73,17 +37,12 @@ ifeq ($(shell uname -a),)
    EXE_EXT = .exe
 endif
 
-ifeq ($(BUILD_64BIT),)
-ifeq ($(shell uname -m), x86_64)
-   BUILD_64BIT = 1
-else ifeq ($(shell uname -m), arm64)
-   BUILD_64BIT = 1
-else ifeq ($(shell uname -m), aarch64)
-   BUILD_64BIT = 1
+ifeq ($(filter $(shell uname -m),64),64)
+   BUILD_64BIT := 1
 else
-   BUILD_64BIT = 0
+   BUILD_64BIT := 0
 endif
-endif
+TARGET_64BIT := $(BUILD_64BIT)
 
 LD        = $(CXX)
 AR        = ar cru
@@ -94,16 +53,37 @@ ifeq ($(platform), unix)
    TARGET  := $(TARGET_NAME)_libretro.so
    DEFINES += -fPIC
    LDFLAGS += -shared -Wl,--version-script=$(BUILD_DIR)/link.T -fPIC
-   TARGET_64BIT := $(BUILD_64BIT)
    CXXFLAGS := -std=c++11
    DEFINES += -DUSE_CXX11
+
+# Raspberry Pi 3 (64 bit)
+else ifeq ($(platform), rpi3_64)
+   TARGET = $(TARGET_NAME)_libretro.so
+   DEFINES += -fPIC -Wno-multichar -D_ARM_ASSEM_ -DUSE_CXX11 -DARM
+   CFLAGS += -fPIC
+   LDFLAGS += -shared -Wl,--version-script=$(BUILD_DIR)/link.T -fPIC
+   CFLAGS += -mcpu=cortex-a53 -mtune=cortex-a53
+   CFLAGS += -fomit-frame-pointer -ffast-math
+   CXXFLAGS = $(CFLAGS) -frtti
+   BUILD_64BIT = 1
+
+# Raspberry Pi 4 (64 bit)
+else ifeq ($(platform), rpi4_64)
+   TARGET = $(TARGET_NAME)_libretro.so
+   DEFINES += -fPIC -Wno-multichar -D_ARM_ASSEM_ -DUSE_CXX11 -DARM
+   CFLAGS += -fPIC
+   LDFLAGS += -shared -Wl,--version-script=$(BUILD_DIR)/link.T -fPIC
+   CFLAGS += -mcpu=cortex-a72 -mtune=cortex-a72
+   CFLAGS += -fomit-frame-pointer -ffast-math
+   CXXFLAGS = $(CFLAGS) -frtti -std=c++11
+   BUILD_64BIT = 1
+
 # OS X
 else ifeq ($(platform), osx)
    TARGET  := $(TARGET_NAME)_libretro.dylib
    DEFINES += -fPIC -Wno-undefined-var-template -Wno-pragma-pack
    LDFLAGS += -dynamiclib -fPIC
    DEFINES += -DHAVE_POSIX_MEMALIGN=1
-   TARGET_64BIT := $(BUILD_64BIT)
    CXXFLAGS := -std=c++11
    DEFINES += -DUSE_CXX11
 
@@ -113,8 +93,6 @@ else ifeq ($(platform), osx)
 	CPPFLAGS += $(TARGET_RULE)
 	CXXFLAGS += $(TARGET_RULE)
 	LDFLAGS  += $(TARGET_RULE)
-	# Hardcode TARGET_64BIT for now
-	TARGET_64BIT = 1
    endif
 
 # iOS
@@ -168,7 +146,6 @@ else ifeq ($(platform), qnx)
 # Genode
 else ifeq ($(platform), genode)
    TARGET  := libretro.so
-   TARGET_64BIT := $(BUILD_64BIT)
    DEFINES += -fPIC -DSYSTEM_NOT_SUPPORTING_D_TYPE -DFRONTEND_SUPPORTS_RGB565
    C_PKGS   = libc
    CXX_PKGS = stdcxx genode-base
@@ -211,7 +188,7 @@ else ifeq ($(platform), libnx)
     DEFINES	+= -g -O3 -fPIE -I$(LIBNX)/include/ -ffunction-sections -fdata-sections -ftls-model=local-exec
     DEFINES += $(INCDIRS)
     DEFINES += -D__SWITCH__ -DHAVE_LIBNX -march=armv8-a -mtune=cortex-a57 -mtp=soft
-    DEFINES += -I../libretro-common/include
+    DEFINES += -I$(LIBRETRO_COMM_DIR)/include
     CXXFLAGS := $(ASFLAGS) -std=gnu++11 -fpermissive
     STATIC_LINKING = 1
 
@@ -224,7 +201,7 @@ else ifeq ($(platform), wiiu)
    AR_ALONE = $(DEVKITPPC)/bin/powerpc-eabi-ar$(EXE_EXT)
    DEFINES += -DGEKKO -mwup -mcpu=750 -meabi -mhard-float -D__POWERPC__ -D__ppc__ -DWORDS_BIGENDIAN=1 -DMSB_FIRST
    DEFINES += -U__INT32_TYPE__ -U __UINT32_TYPE__ -D__INT32_TYPE__=int -fpermissive
-   DEFINES += -DHAVE_STRTOUL -DWIIU -I../libretro-common/include
+   DEFINES += -DHAVE_STRTOUL -DWIIU -I$(LIBRETRO_COMM_DIR)/include
    LITE := 1
    CP := cp
 
@@ -276,16 +253,23 @@ else ifeq ($(platform), gcw0)
    HAVE_MT32EMU = 0
    NO_HIGH_DEF := 1
 
-# Raspberry Pi 4
-else ifneq (,$(findstring rpi4,$(platform)))
+# MIYOO
+else ifeq ($(platform), miyoo)
    TARGET := $(TARGET_NAME)_libretro.so
-   TARGET_64BIT := $(BUILD_64BIT)
-   DEFINES += -fPIC -Wno-multichar -D_ARM_ASSEM_
-   LDFLAGS += -shared -Wl,--version-script=$(BUILD_DIR)/link.T -fPIC
-   DEFINES += -mcpu=cortex-a72
-   CXXFLAGS := -std=c++11
-   DEFINES += -DUSE_CXX11
-   DEFINES += -DARM
+   CC = /opt/miyoo/usr/bin/arm-linux-gcc
+   CXX = /opt/miyoo/usr/bin/arm-linux-g++
+   LD = /opt/miyoo/usr/bin/arm-linux-g++
+   AR = /opt/miyoo/usr/bin/arm-linux-ar cru
+   RANLIB = /opt/miyoo/usr/bin/arm-linux-ranlib
+   DEFINES += -DDINGUX -fomit-frame-pointer -ffast-math -march=armv5te -mtune=arm926ej-s -fPIC
+   DEFINES += -ffunction-sections -fdata-sections
+   LDFLAGS += -shared -Wl,--gc-sections -Wl,--version-script=../link.T -fPIC
+   USE_VORBIS = 0
+   USE_THEORADEC = 0
+   USE_TREMOR = 1
+   USE_LIBCO  = 0
+   HAVE_MT32EMU = 0
+   NO_HIGH_DEF := 1
 
 else ifeq ($(platform), android-armv7)
    TARGET  := $(TARGET_NAME)_libretro_android.so
@@ -324,7 +308,7 @@ endif
    DEFINES += -DARM
 
 # Odroid Go Advance
-else ifneq (,$(findstring oga_a35_neon_hardfloat,$(platform)))
+else ifeq (,$(findstring oga_a35_neon_hardfloat,$(platform)))
    TARGET := $(TARGET_NAME)_libretro.so
    DEFINES += -fPIC -Wno-multichar -D_ARM_ASSEM_
    LDFLAGS += -shared -Wl,--version-script=$(BUILD_DIR)/link.T -fPIC
@@ -438,7 +422,6 @@ else ifneq (,$(findstring windows_msvc2017,$(platform)))
 
 else
 	CC ?= gcc
-	TARGET_64BIT := $(BUILD_64BIT)
 	TARGET  := $(TARGET_NAME)_libretro.dll
 	DEFINES += -DHAVE_FSEEKO -DHAVE_INTTYPES_H -fPIC
 	CXXFLAGS += -fno-permissive
@@ -463,18 +446,6 @@ else
    DEFINES += -DSIZEOF_SIZE_T=4
 endif
 
-ifeq ($(USE_LIBCO), 1)
-   DEFINES += -DUSE_LIBCO
-else
-   LDFLAGS += -lpthread
-endif
-
-DEFINES += -DCORE_NAME=\"$(CORE_NAME)\"
-DEFINES += -DCORE_EXTENSIONS=\"$(CORE_EXTENSIONS)\"
-ifneq ($(GIT_VERSION),unknown)
-	DEFINES += -DGIT_VERSION=\"$(GIT_VERSION)\"
-endif
-
 # Define toolset
 ifdef TOOLSET
     CC        = $(TOOLSET)gcc
@@ -487,11 +458,6 @@ endif
 MKDIR         = mkdir -p
 RM            = rm -f
 RM_REC        = rm -rf
-
-ifeq ($(HAVE_MT32EMU),1)
-   USE_MT32EMU = 1
-   DEFINES += -DUSE_MT32EMU
-endif
 
 # Define build flags
 DEFINES       += -D__LIBRETRO__ -DNONSTANDARD_PORT -DUSE_RGB_COLOR -DUSE_OSD -DDISABLE_TEXT_CONSOLE -DFRONTEND_SUPPORTS_RGB565 -DUSE_TRANSLATION -DDETECTION_STATIC -DHAVE_CONFIG_H -DUSE_BINK -DUSE_LUA -DUSE_TINYGL
@@ -510,10 +476,7 @@ CXXFLAGS += -std=c++11
 LIBS += -lwinmm
 endif
 
-#BACKEND := libretro
-DETECT_OBJS :=
-
-include Makefile.common
+include $(ROOT_PATH)/Makefile.common
 
 ######################################################################
 # The build rules follow - normally you should have no need to

@@ -1,3 +1,12 @@
 [submodule "scummvm"]
 	path = scummvm
 	url = https://github.com/scummvm/scummvm
+	ignore = dirty
+[submodule "libretro-deps"]
+	path = libretro-deps
+	url = https://github.com/libretro/libretro-deps
+	ignore = dirty
+[submodule "libretro-common"]
+	path = libretro-common
+	url = https://github.com/libretro/libretro-common
+	ignore = dirty

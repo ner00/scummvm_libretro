@@ -1,3 +1,5 @@
+build/libs/
+build/obj/
 *.o
 *.a
 scummvm.zip
