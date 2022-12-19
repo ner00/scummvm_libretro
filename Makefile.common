@@ -92,7 +92,11 @@ INCLUDES  += -I$(DEPS_DIR)
 INCLUDES  += -I$(LIBRETRO_COMM_DIR)/include -I$(LIBRETRO_COMM_DIR)/include/compat
 OBJS_DEPS += $(LIBRETRO_COMM_DIR)/file/file_path_io.o \
 	$(LIBRETRO_COMM_DIR)/file/file_path.o \
-	$(LIBRETRO_COMM_DIR)/file/retro_dirent.o
+	$(LIBRETRO_COMM_DIR)/file/retro_dirent.o \
+	$(LIBRETRO_COMM_DIR)/vfs/vfs_implementation.o \
+	$(LIBRETRO_COMM_DIR)/string/stdstring.o \
+	$(LIBRETRO_COMM_DIR)/time/rtime.o
+
 
 ifeq ($(USE_LIBCO), 1)
 OBJS_DEPS += $(LIBRETRO_COMM_DIR)/libco/libco.o
