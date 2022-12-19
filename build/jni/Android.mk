@@ -48,11 +48,6 @@ NO_HIGH_DEF     = 0
 NO_WIP         ?= 1
 #BACKEND       := libretro
 
-ifeq ($(HAVE_MT32EMU),1)
-USE_MT32EMU = 1
-DEFINES += -DUSE_MT32EMU
-endif
-
 include $(ROOT_PATH)/Makefile.common
 include $(addprefix $(CORE_DIR)/, $(addsuffix /module.mk,$(MODULES)))
 OBJS_MODULES := $(addprefix $(CORE_DIR)/, $(foreach MODULE,$(MODULES),$(MODULE_OBJS-$(MODULE))))

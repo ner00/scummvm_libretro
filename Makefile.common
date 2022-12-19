@@ -449,8 +449,9 @@ MODULES += \
 	po \
 	doc
 
-ifeq ($(USE_MT32EMU),1)
+ifeq ($(HAVE_MT32EMU),1)
    MODULES += audio/softsynth/mt32
+   DEFINES += -DUSE_MT32EMU
 endif
 
 ######################################################################
