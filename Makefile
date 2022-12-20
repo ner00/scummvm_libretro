@@ -37,10 +37,12 @@ ifeq ($(shell uname -a),)
    EXE_EXT = .exe
 endif
 
+ifeq ($(BUILD_64BIT),)
 ifeq ($(filter $(shell uname -m),64),64)
    BUILD_64BIT := 1
 else
    BUILD_64BIT := 0
+endif
 endif
 TARGET_64BIT := $(BUILD_64BIT)
 
