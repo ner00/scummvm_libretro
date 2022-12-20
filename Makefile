@@ -50,42 +50,34 @@ RANLIB    = ranlib
 LS        = ls
 
 ifeq ($(platform), unix)
-   TARGET  := $(TARGET_NAME)_libretro.so
-   DEFINES += -fPIC
-   LDFLAGS += -shared -Wl,--version-script=$(BUILD_DIR)/link.T -fPIC
-   CXXFLAGS := -std=c++11
-   DEFINES += -DUSE_CXX11
+   TARGET   := $(TARGET_NAME)_libretro.so
+   DEFINES  += -DHAVE_POSIX_MEMALIGN -DUSE_CXX11
+   LDFLAGS  += -shared -Wl,--version-script=$(BUILD_DIR)/link.T -fPIC
+   CFLAGS   += -fPIC
+   CXXFLAGS += $(CFLAGS) -std=c++11
 
 # Raspberry Pi 3 (64 bit)
 else ifeq ($(platform), rpi3_64)
-   TARGET = $(TARGET_NAME)_libretro.so
+   TARGET   = $(TARGET_NAME)_libretro.so
    DEFINES += -fPIC -Wno-multichar -D_ARM_ASSEM_ -DUSE_CXX11 -DARM
-   CFLAGS += -fPIC
    LDFLAGS += -shared -Wl,--version-script=$(BUILD_DIR)/link.T -fPIC
-   CFLAGS += -mcpu=cortex-a53 -mtune=cortex-a53
-   CFLAGS += -fomit-frame-pointer -ffast-math
-   CXXFLAGS = $(CFLAGS) -frtti
-   BUILD_64BIT = 1
+   CFLAGS  += -fPIC -mcpu=cortex-a53 -mtune=cortex-a53 -fomit-frame-pointer -ffast-math
+   CXXFLAGS = $(CFLAGS) -frtti -std=c++11
 
 # Raspberry Pi 4 (64 bit)
 else ifeq ($(platform), rpi4_64)
    TARGET = $(TARGET_NAME)_libretro.so
    DEFINES += -fPIC -Wno-multichar -D_ARM_ASSEM_ -DUSE_CXX11 -DARM
-   CFLAGS += -fPIC
    LDFLAGS += -shared -Wl,--version-script=$(BUILD_DIR)/link.T -fPIC
-   CFLAGS += -mcpu=cortex-a72 -mtune=cortex-a72
-   CFLAGS += -fomit-frame-pointer -ffast-math
+   CFLAGS += -fPIC -mcpu=cortex-a72 -mtune=cortex-a72 -fomit-frame-pointer -ffast-math
    CXXFLAGS = $(CFLAGS) -frtti -std=c++11
-   BUILD_64BIT = 1
 
 # OS X
 else ifeq ($(platform), osx)
    TARGET  := $(TARGET_NAME)_libretro.dylib
-   DEFINES += -fPIC -Wno-undefined-var-template -Wno-pragma-pack
+   DEFINES += -fPIC -Wno-undefined-var-template -Wno-pragma-pack -DHAVE_POSIX_MEMALIGN=1 -DUSE_CXX11
    LDFLAGS += -dynamiclib -fPIC
-   DEFINES += -DHAVE_POSIX_MEMALIGN=1
    CXXFLAGS := -std=c++11
-   DEFINES += -DUSE_CXX11
 
    ifeq ($(CROSS_COMPILE),1)
 	TARGET_RULE   = -target $(LIBRETRO_APPLE_PLATFORM) -isysroot $(LIBRETRO_APPLE_ISYSROOT)
