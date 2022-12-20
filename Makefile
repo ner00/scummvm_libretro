@@ -80,11 +80,13 @@ else ifeq ($(platform), osx)
    CXXFLAGS := -std=c++11
 
    ifeq ($(CROSS_COMPILE),1)
-	TARGET_RULE   = -target $(LIBRETRO_APPLE_PLATFORM) -isysroot $(LIBRETRO_APPLE_ISYSROOT)
-	CFLAGS   += $(TARGET_RULE)
-	CPPFLAGS += $(TARGET_RULE)
-	CXXFLAGS += $(TARGET_RULE)
-	LDFLAGS  += $(TARGET_RULE)
+      TARGET_RULE   = -target $(LIBRETRO_APPLE_PLATFORM) -isysroot $(LIBRETRO_APPLE_ISYSROOT)
+      CFLAGS   += $(TARGET_RULE)
+      CPPFLAGS += $(TARGET_RULE)
+      CXXFLAGS += $(TARGET_RULE)
+      LDFLAGS  += $(TARGET_RULE)
+      # Hardcode TARGET_64BIT for now
+      TARGET_64BIT = 1
    endif
 
 # iOS
