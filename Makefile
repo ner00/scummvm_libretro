@@ -468,6 +468,8 @@ CXXFLAGS += -std=c++11
 LIBS += -lwinmm
 endif
 
+$(info Platform is $(platform) $(shell test $(TARGET_64BIT) = 1 && echo 64bit || echo 32bit))
+
 include $(ROOT_PATH)/Makefile.common
 
 ######################################################################
