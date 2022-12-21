@@ -6,7 +6,7 @@ TARGET_NAME := scummvm_mainline
 DEFINES   :=
 
 # All current 64-bit archs have 64 in the abi name
-ifeq ($(filter $(TARGET_ARCH_ABI),64),64)
+ifneq (,$(findstring 64,$(TARGET_ARCH_ABI)))
   TARGET_64BIT := 1
 endif
 

@@ -38,10 +38,10 @@ ifeq ($(shell uname -a),)
 endif
 
 ifeq ($(BUILD_64BIT),)
-ifeq ($(filter $(shell uname -m),64),64)
-   BUILD_64BIT := 1
-else
+ifeq (,$(findstring 64,$(shell uname -m)))
    BUILD_64BIT := 0
+else
+   BUILD_64BIT := 1
 endif
 endif
 TARGET_64BIT := $(BUILD_64BIT)
