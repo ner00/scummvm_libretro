@@ -50,10 +50,13 @@ LD        = $(CXX)
 AR        = ar cru
 RANLIB    = ranlib
 LS        = ls
+MKDIR     = mkdir -p
+RM        = rm -f
+RM_REC    = rm -rf
 
 ifeq ($(platform), unix)
    TARGET   := $(TARGET_NAME)_libretro.so
-   DEFINES  += -DHAVE_POSIX_MEMALIGN -DUSE_CXX11
+   DEFINES  += -DHAVE_POSIX_MEMALIGN=1 -DUSE_CXX11
    LDFLAGS  += -shared -Wl,--version-script=$(BUILD_PATH)/link.T -fPIC
    CFLAGS   += -fPIC
    CXXFLAGS += $(CFLAGS) -std=c++11
@@ -450,10 +453,6 @@ ifdef TOOLSET
     AR        = $(TOOLSET)ar cru
     RANLIB    = $(TOOLSET)ranlib
 endif
-
-MKDIR         = mkdir -p
-RM            = rm -f
-RM_REC        = rm -rf
 
 # Define build flags
 DEFINES       += -D__LIBRETRO__ -DNONSTANDARD_PORT -DUSE_RGB_COLOR -DUSE_OSD -DDISABLE_TEXT_CONSOLE -DFRONTEND_SUPPORTS_RGB565 -DUSE_TRANSLATION -DDETECTION_STATIC -DHAVE_CONFIG_H -DUSE_BINK -DUSE_LUA -DUSE_TINYGL
