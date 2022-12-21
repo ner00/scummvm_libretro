@@ -12,8 +12,8 @@ endif
 
 include $(ROOT_PATH)/Makefile.common
 
-include $(addprefix $(CORE_DIR)/, $(addsuffix /module.mk,$(MODULES)))
-OBJS_MODULES := $(addprefix $(CORE_DIR)/, $(foreach MODULE,$(MODULES),$(MODULE_OBJS-$(MODULE))))
+include $(addprefix $(SCUMMVM_PATH)/, $(addsuffix /module.mk,$(MODULES)))
+OBJS_MODULES := $(addprefix $(SCUMMVM_PATH)/, $(foreach MODULE,$(MODULES),$(MODULE_OBJS-$(MODULE))))
 
 COREFLAGS := $(DEFINES) -D__LIBRETRO__ -DNONSTANDARD_PORT -DUSE_RGB_COLOR -DUSE_OSD -DDISABLE_TEXT_CONSOLE -DFRONTEND_SUPPORTS_RGB565 -DUSE_LIBCO  -DUSE_TRANSLATION -DDETECTION_STATIC -DHAVE_CONFIG_H -DUSE_BINK -DUSE_CXX11 -DUSE_TINYGL
 COREFLAGS += -Wno-multichar -Wno-undefined-var-template -Wno-pragma-pack
@@ -25,11 +25,11 @@ endif
 include $(CLEAR_VARS)
 LOCAL_MODULE          := retro
 LOCAL_MODULE_FILENAME := $(TARGET_NAME)_libretro
-LOCAL_SRC_FILES       := $(DETECT_OBJS:%.o=$(CORE_DIR)/%.cpp)  $(OBJS_DEPS:%.o=%.c) $(OBJS_MODULES:%.o=%.cpp) $(OBJS:%.o=%.cpp)
+LOCAL_SRC_FILES       := $(DETECT_OBJS:%.o=$(SCUMMVM_PATH)/%.cpp)  $(OBJS_DEPS:%.o=%.c) $(OBJS_MODULES:%.o=%.cpp) $(OBJS:%.o=%.cpp)
 LOCAL_C_INCLUDES      := $(subst -I,,$(INCLUDES))
 LOCAL_CPPFLAGS        := $(COREFLAGS) -std=c++11
 LOCAL_CFLAGS          := $(COREFLAGS)
-LOCAL_LDFLAGS         := -Wl,-version-script=$(BUILD_DIR)/link.T
+LOCAL_LDFLAGS         := -Wl,-version-script=$(BUILD_PATH)/link.T
 LOCAL_LDLIBS          := -lz -llog
 LOCAL_CPP_FEATURES    := rtti
 LOCAL_ARM_MODE        := arm

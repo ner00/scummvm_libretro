@@ -54,7 +54,7 @@ LS        = ls
 ifeq ($(platform), unix)
    TARGET   := $(TARGET_NAME)_libretro.so
    DEFINES  += -DHAVE_POSIX_MEMALIGN -DUSE_CXX11
-   LDFLAGS  += -shared -Wl,--version-script=$(BUILD_DIR)/link.T -fPIC
+   LDFLAGS  += -shared -Wl,--version-script=$(BUILD_PATH)/link.T -fPIC
    CFLAGS   += -fPIC
    CXXFLAGS += $(CFLAGS) -std=c++11
 
@@ -62,7 +62,7 @@ ifeq ($(platform), unix)
 else ifeq ($(platform), rpi3_64)
    TARGET   = $(TARGET_NAME)_libretro.so
    DEFINES += -fPIC -Wno-multichar -D_ARM_ASSEM_ -DUSE_CXX11 -DARM
-   LDFLAGS += -shared -Wl,--version-script=$(BUILD_DIR)/link.T -fPIC
+   LDFLAGS += -shared -Wl,--version-script=$(BUILD_PATH)/link.T -fPIC
    CFLAGS  += -fPIC -mcpu=cortex-a53 -mtune=cortex-a53 -fomit-frame-pointer -ffast-math
    CXXFLAGS = $(CFLAGS) -frtti -std=c++11
 
@@ -70,7 +70,7 @@ else ifeq ($(platform), rpi3_64)
 else ifeq ($(platform), rpi4_64)
    TARGET = $(TARGET_NAME)_libretro.so
    DEFINES += -fPIC -Wno-multichar -D_ARM_ASSEM_ -DUSE_CXX11 -DARM
-   LDFLAGS += -shared -Wl,--version-script=$(BUILD_DIR)/link.T -fPIC
+   LDFLAGS += -shared -Wl,--version-script=$(BUILD_PATH)/link.T -fPIC
    CFLAGS += -fPIC -mcpu=cortex-a72 -mtune=cortex-a72 -fomit-frame-pointer -ffast-math
    CXXFLAGS = $(CFLAGS) -frtti -std=c++11
 
@@ -132,7 +132,7 @@ endif
 else ifeq ($(platform), qnx)
    TARGET  := $(TARGET_NAME)_libretro_$(platform).so
    DEFINES += -fPIC -DSYSTEM_NOT_SUPPORTING_D_TYPE
-   LDFLAGS += -shared -Wl,--version-script=$(BUILD_DIR)/link.T -fPIC
+   LDFLAGS += -shared -Wl,--version-script=$(BUILD_PATH)/link.T -fPIC
    CC = qcc -Vgcc_ntoarmv7le
    CXX = QCC -Vgcc_ntoarmv7le
    LD = QCC -Vgcc_ntoarmv7le
@@ -184,7 +184,7 @@ else ifeq ($(platform), libnx)
     DEFINES	+= -g -O3 -fPIE -I$(LIBNX)/include/ -ffunction-sections -fdata-sections -ftls-model=local-exec
     DEFINES += $(INCDIRS)
     DEFINES += -D__SWITCH__ -DHAVE_LIBNX -march=armv8-a -mtune=cortex-a57 -mtp=soft
-    DEFINES += -I$(LIBRETRO_COMM_DIR)/include
+    DEFINES += -I$(LIBRETRO_COMM_PATH)/include
     CXXFLAGS := $(ASFLAGS) -std=gnu++11 -fpermissive
     STATIC_LINKING = 1
 
@@ -197,7 +197,7 @@ else ifeq ($(platform), wiiu)
    AR_ALONE = $(DEVKITPPC)/bin/powerpc-eabi-ar$(EXE_EXT)
    DEFINES += -DGEKKO -mwup -mcpu=750 -meabi -mhard-float -D__POWERPC__ -D__ppc__ -DWORDS_BIGENDIAN=1 -DMSB_FIRST
    DEFINES += -U__INT32_TYPE__ -U __UINT32_TYPE__ -D__INT32_TYPE__=int -fpermissive
-   DEFINES += -DHAVE_STRTOUL -DWIIU -I$(LIBRETRO_COMM_DIR)/include
+   DEFINES += -DHAVE_STRTOUL -DWIIU -I$(LIBRETRO_COMM_PATH)/include
    LITE := 1
    CP := cp
 
@@ -241,7 +241,7 @@ else ifeq ($(platform), gcw0)
    RANLIB = /opt/gcw0-toolchain/usr/bin/mipsel-linux-ranlib
    DEFINES += -DDINGUX -fomit-frame-pointer -ffast-math -march=mips32 -mtune=mips32r2 -mhard-float -fPIC
    DEFINES += -ffunction-sections -fdata-sections
-   LDFLAGS += -shared -Wl,--gc-sections -Wl,--version-script=$(BUILD_DIR)/link.T -fPIC
+   LDFLAGS += -shared -Wl,--gc-sections -Wl,--version-script=$(BUILD_PATH)/link.T -fPIC
    USE_VORBIS = 0
    USE_THEORADEC = 0
    USE_TREMOR = 1
@@ -270,7 +270,7 @@ else ifeq ($(platform), miyoo)
 else ifeq ($(platform), android-armv7)
    TARGET  := $(TARGET_NAME)_libretro_android.so
    DEFINES += -fPIC -Wno-multichar -D_ARM_ASSEM_
-   LDFLAGS += -shared -Wl,--version-script=$(BUILD_DIR)/link.T -fPIC
+   LDFLAGS += -shared -Wl,--version-script=$(BUILD_PATH)/link.T -fPIC
    TOOLSET = arm-linux-androideabi-
    USE_VORBIS = 0
    USE_THEORADEC = 0
@@ -279,7 +279,7 @@ else ifeq ($(platform), android-armv7)
 else ifneq (,$(findstring armv,$(platform)))
    TARGET := $(TARGET_NAME)_libretro.so
    DEFINES += -fPIC -Wno-multichar -D_ARM_ASSEM_
-   LDFLAGS += -shared -Wl,--version-script=$(BUILD_DIR)/link.T -fPIC
+   LDFLAGS += -shared -Wl,--version-script=$(BUILD_PATH)/link.T -fPIC
    USE_VORBIS = 0
    USE_THEORADEC = 0
    USE_TREMOR = 1
@@ -307,7 +307,7 @@ endif
 else ifeq (,$(findstring oga_a35_neon_hardfloat,$(platform)))
    TARGET := $(TARGET_NAME)_libretro.so
    DEFINES += -fPIC -Wno-multichar -D_ARM_ASSEM_
-   LDFLAGS += -shared -Wl,--version-script=$(BUILD_DIR)/link.T -fPIC
+   LDFLAGS += -shared -Wl,--version-script=$(BUILD_PATH)/link.T -fPIC
    USE_VORBIS = 0
    USE_THEORADEC = 0
    USE_TREMOR = 1
@@ -421,7 +421,7 @@ else
 	TARGET  := $(TARGET_NAME)_libretro.dll
 	DEFINES += -DHAVE_FSEEKO -DHAVE_INTTYPES_H -fPIC
 	CXXFLAGS += -fno-permissive
-	LDFLAGS += -shared -static-libgcc -static-libstdc++ -s -Wl,--version-script=$(BUILD_DIR)/link.T -fPIC
+	LDFLAGS += -shared -static-libgcc -static-libstdc++ -s -Wl,--version-script=$(BUILD_PATH)/link.T -fPIC
 endif
 
 ifeq ($(DEBUG), 1)
@@ -485,23 +485,23 @@ CXXFLAGS += $(DEFINES) $(INCLUDES)
 CFLAGS += $(DEFINES) $(INCLUDES)
 
 # Include the build instructions for all modules
-include $(addprefix $(CORE_DIR)/, $(addsuffix /module.mk,$(MODULES)))
+include $(addprefix $(SCUMMVM_PATH)/, $(addsuffix /module.mk,$(MODULES)))
 
 # Depdir information
-DEPDIRS := $(addsuffix $(DEPDIR),$(MODULE_DIRS))
+DEPDIRS := $(addsuffix $(DEPDIR),$(MODULE_PATHS))
 
 # Hack for libnx DEPSDIR issues
 libnx-ln:
 ifeq ($(platform), libnx)
-	ln -s $(CORE_DIR)/audio/ audio
-	ln -s $(CORE_DIR)/backends/ backends
-	ln -s $(CORE_DIR)/base/ base
-	ln -s $(CORE_DIR)/common/ common
-	ln -s $(CORE_DIR)/engines/ engines
-	ln -s $(CORE_DIR)/graphics/ graphics
-	ln -s $(CORE_DIR)/gui/ gui
-	ln -s $(CORE_DIR)/image/ image
-	ln -s $(CORE_DIR)/video/ video
+	ln -s $(SCUMMVM_PATH)/audio/ audio
+	ln -s $(SCUMMVM_PATH)/backends/ backends
+	ln -s $(SCUMMVM_PATH)/base/ base
+	ln -s $(SCUMMVM_PATH)/common/ common
+	ln -s $(SCUMMVM_PATH)/engines/ engines
+	ln -s $(SCUMMVM_PATH)/graphics/ graphics
+	ln -s $(SCUMMVM_PATH)/gui/ gui
+	ln -s $(SCUMMVM_PATH)/image/ image
+	ln -s $(SCUMMVM_PATH)/video/ video
 	touch libnx-ln
 endif
 
@@ -602,7 +602,7 @@ endif
 # Mark *.d files and most *.mk files as PHONY. This stops make from trying to
 # recreate them (which it can't), and in particular from looking for potential
 # source files. This can save quite a bit of disk access time.
-.PHONY: $(wildcard $(addsuffix /*.d,$(DEPDIRS))) $(addprefix $(CORE_DIR)/, $(addsuffix /module.mk,$(MODULES))) \
-	$(CORE_DIR)/$(port_mk) $(CORE_DIR)/rules.mk $(CORE_DIR)/engines/engines.mk
+.PHONY: $(wildcard $(addsuffix /*.d,$(DEPDIRS))) $(addprefix $(SCUMMVM_PATH)/, $(addsuffix /module.mk,$(MODULES))) \
+	$(SCUMMVM_PATH)/$(port_mk) $(SCUMMVM_PATH)/rules.mk $(SCUMMVM_PATH)/engines/engines.mk
 
 .PHONY: clean
