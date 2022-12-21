@@ -64,7 +64,7 @@ ifeq ($(platform), unix)
 # Raspberry Pi 3 (64 bit)
 else ifeq ($(platform), rpi3_64)
    TARGET   = $(TARGET_NAME)_libretro.so
-   DEFINES += -fPIC -Wno-multichar -D_ARM_ASSEM_ -DUSE_CXX11 -DARM
+   DEFINES += -fPIC -D_ARM_ASSEM_ -DUSE_CXX11 -DARM
    LDFLAGS += -shared -Wl,--version-script=$(BUILD_PATH)/link.T -fPIC
    CFLAGS  += -fPIC -mcpu=cortex-a53 -mtune=cortex-a53 -fomit-frame-pointer -ffast-math
    CXXFLAGS = $(CFLAGS) -frtti -std=c++11
@@ -72,7 +72,7 @@ else ifeq ($(platform), rpi3_64)
 # Raspberry Pi 4 (64 bit)
 else ifeq ($(platform), rpi4_64)
    TARGET = $(TARGET_NAME)_libretro.so
-   DEFINES += -fPIC -Wno-multichar -D_ARM_ASSEM_ -DUSE_CXX11 -DARM
+   DEFINES += -fPIC -D_ARM_ASSEM_ -DUSE_CXX11 -DARM
    LDFLAGS += -shared -Wl,--version-script=$(BUILD_PATH)/link.T -fPIC
    CFLAGS += -fPIC -mcpu=cortex-a72 -mtune=cortex-a72 -fomit-frame-pointer -ffast-math
    CXXFLAGS = $(CFLAGS) -frtti -std=c++11
@@ -272,7 +272,7 @@ else ifeq ($(platform), miyoo)
 
 else ifeq ($(platform), android-armv7)
    TARGET  := $(TARGET_NAME)_libretro_android.so
-   DEFINES += -fPIC -Wno-multichar -D_ARM_ASSEM_
+   DEFINES += -fPIC -D_ARM_ASSEM_
    LDFLAGS += -shared -Wl,--version-script=$(BUILD_PATH)/link.T -fPIC
    TOOLSET = arm-linux-androideabi-
    USE_VORBIS = 0
@@ -281,14 +281,13 @@ else ifeq ($(platform), android-armv7)
    HAVE_MT32EMU = 0
 else ifneq (,$(findstring armv,$(platform)))
    TARGET := $(TARGET_NAME)_libretro.so
-   DEFINES += -fPIC -Wno-multichar -D_ARM_ASSEM_
+   DEFINES += -fPIC -D_ARM_ASSEM_ -DUSE_CXX11
    LDFLAGS += -shared -Wl,--version-script=$(BUILD_PATH)/link.T -fPIC
    USE_VORBIS = 0
    USE_THEORADEC = 0
    USE_TREMOR = 1
    HAVE_MT32EMU = 0
    CXXFLAGS := -std=c++11
-   DEFINES += -DUSE_CXX11
 ifneq (,$(findstring cortexa8,$(platform)))
    DEFINES += -marm -mcpu=cortex-a8
 else ifneq (,$(findstring cortexa9,$(platform)))
@@ -309,7 +308,7 @@ endif
 # Odroid Go Advance
 else ifeq (,$(findstring oga_a35_neon_hardfloat,$(platform)))
    TARGET := $(TARGET_NAME)_libretro.so
-   DEFINES += -fPIC -Wno-multichar -D_ARM_ASSEM_
+   DEFINES += -fPIC -D_ARM_ASSEM_
    LDFLAGS += -shared -Wl,--version-script=$(BUILD_PATH)/link.T -fPIC
    USE_VORBIS = 0
    USE_THEORADEC = 0
@@ -455,12 +454,10 @@ ifdef TOOLSET
 endif
 
 # Define build flags
-DEFINES       += -D__LIBRETRO__ -DNONSTANDARD_PORT -DUSE_RGB_COLOR -DUSE_OSD -DDISABLE_TEXT_CONSOLE -DFRONTEND_SUPPORTS_RGB565 -DUSE_TRANSLATION -DDETECTION_STATIC -DHAVE_CONFIG_H -DUSE_BINK -DUSE_LUA -DUSE_TINYGL
 DEPDIR        = .deps
 HAVE_GCC3     = true
 USE_RGB_COLOR = true
 
-DEFINES += -Wno-multichar -Wno-unknown-pragmas -Wno-write-strings
 CXXFLAGS += -Wno-reorder
 
 # Compile platform specific parts (e.g. filesystem)
