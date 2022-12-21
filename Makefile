@@ -279,7 +279,7 @@ else ifeq ($(platform), android-armv7)
    USE_THEORADEC = 0
    USE_TREMOR = 1
    HAVE_MT32EMU = 0
-else ifneq (,$(findstring armv,$(platform)))
+else ifneq (,$(or $(findstring armv7,$(platform)),$(findstring armv6,$(platform))))
    TARGET := $(TARGET_NAME)_libretro.so
    DEFINES += -fPIC -D_ARM_ASSEM_ -DUSE_CXX11
    LDFLAGS += -shared -Wl,--version-script=$(BUILD_PATH)/link.T -fPIC
