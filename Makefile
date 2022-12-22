@@ -252,7 +252,7 @@ else ifneq (,$(findstring hardfloat,$(platform)))
 endif
 
 # ARM v8
-else ifeq (,$(findstring armv8,$(platform)))
+else ifneq (,$(findstring armv8,$(platform)))
    TARGET := $(TARGET_NAME)_libretro.so
    DEFINES += -fPIC -D_ARM_ASSEM_ -DARM -marm -mtune=cortex-a53 -mfpu=neon-fp-armv8 -mfloat-abi=hard -march=armv8-a+crc
    LDFLAGS += -shared -Wl,--version-script=$(BUILD_PATH)/link.T -fPIC
@@ -260,7 +260,7 @@ else ifeq (,$(findstring armv8,$(platform)))
    HAVE_NEON = 1
 
 # Odroid Go Advance
-else ifeq (,$(findstring oga_a35_neon_hardfloat,$(platform)))
+else ifneq (,$(findstring oga_a35_neon_hardfloat,$(platform)))
    TARGET := $(TARGET_NAME)_libretro.so
    DEFINES += -fPIC -D_ARM_ASSEM_ -DARM -marm -mtune=cortex-a35 -mfpu=neon-fp-armv8 -mfloat-abi=hard -march=armv8-a+crc
    LDFLAGS += -shared -Wl,--version-script=$(BUILD_PATH)/link.T -fPIC
