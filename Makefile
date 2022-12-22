@@ -13,26 +13,6 @@ filter_out2 = $(call filter_out1,$(call filter_out1,$1))
 unixpath = $(subst \,/,$1)
 unixcygpath = /$(subst :,,$(call unixpath,$1))
 
-ifeq ($(platform),)
-platform = unix
-ifeq ($(shell uname -a),)
-   platform = win
-else ifneq ($(findstring MINGW,$(shell uname -a)),)
-   platform = win
-else ifneq ($(findstring Darwin,$(shell uname -a)),)
-   platform = osx
-   arch = intel
-ifeq ($(shell uname -p),arm64)
-   arch = arm
-endif
-ifeq ($(shell uname -p),powerpc)
-   arch = ppc
-endif
-else ifneq ($(findstring win,$(shell uname -a)),)
-   platform = win
-endif
-endif
-
 ifeq ($(shell uname -a),)
    EXE_EXT = .exe
 endif
@@ -54,15 +34,8 @@ MKDIR     = mkdir -p
 RM        = rm -f
 RM_REC    = rm -rf
 
-ifeq ($(platform), unix)
-   TARGET   := $(TARGET_NAME)_libretro.so
-   DEFINES  += -DHAVE_POSIX_MEMALIGN=1 -DUSE_CXX11
-   LDFLAGS  += -shared -Wl,--version-script=$(BUILD_PATH)/link.T -fPIC
-   CFLAGS   += -fPIC
-   CXXFLAGS += $(CFLAGS) -std=c++11
-
 # Raspberry Pi 3 (64 bit)
-else ifeq ($(platform), rpi3_64)
+ifeq ($(platform), rpi3_64)
    TARGET   = $(TARGET_NAME)_libretro.so
    DEFINES += -fPIC -D_ARM_ASSEM_ -DUSE_CXX11 -DARM
    LDFLAGS += -shared -Wl,--version-script=$(BUILD_PATH)/link.T -fPIC
@@ -76,23 +49,6 @@ else ifeq ($(platform), rpi4_64)
    LDFLAGS += -shared -Wl,--version-script=$(BUILD_PATH)/link.T -fPIC
    CFLAGS += -fPIC -mcpu=cortex-a72 -mtune=cortex-a72 -fomit-frame-pointer -ffast-math
    CXXFLAGS = $(CFLAGS) -frtti -std=c++11
-
-# OS X
-else ifeq ($(platform), osx)
-   TARGET  := $(TARGET_NAME)_libretro.dylib
-   DEFINES += -fPIC -Wno-undefined-var-template -Wno-pragma-pack -DHAVE_POSIX_MEMALIGN=1 -DUSE_CXX11
-   LDFLAGS += -dynamiclib -fPIC
-   CXXFLAGS := -std=c++11
-
-   ifeq ($(CROSS_COMPILE),1)
-      TARGET_RULE   = -target $(LIBRETRO_APPLE_PLATFORM) -isysroot $(LIBRETRO_APPLE_ISYSROOT)
-      CFLAGS   += $(TARGET_RULE)
-      CPPFLAGS += $(TARGET_RULE)
-      CXXFLAGS += $(TARGET_RULE)
-      LDFLAGS  += $(TARGET_RULE)
-      # Hardcode TARGET_64BIT for now
-      TARGET_64BIT = 1
-   endif
 
 # iOS
 else ifneq (,$(findstring ios,$(platform)))
@@ -415,11 +371,56 @@ else ifneq (,$(findstring windows_msvc2017,$(platform)))
    LDFLAGS += -DLL
 
 else
+   # Nothing found for specified platform or none set
+   platform = unix
+	ifeq ($(shell uname -a),)
+	   platform = win
+	else ifneq ($(findstring MINGW,$(shell uname -a)),)
+	   platform = win
+	else ifneq ($(findstring Darwin,$(shell uname -a)),)
+	   platform = osx
+	   arch = intel
+	ifeq ($(shell uname -p),arm64)
+	   arch = arm
+	endif
+	ifeq ($(shell uname -p),powerpc)
+	   arch = ppc
+	endif
+	else ifneq ($(findstring win,$(shell uname -a)),)
+	   platform = win
+	endif
+endif
+
+# Unix fallback
+ifeq ($(platform), unix)
+   TARGET   := $(TARGET_NAME)_libretro.so
+   DEFINES  += -DHAVE_POSIX_MEMALIGN=1 -DUSE_CXX11
+   LDFLAGS  += -shared -Wl,--version-script=$(BUILD_PATH)/link.T -fPIC
+   CFLAGS   += -fPIC
+   CXXFLAGS += $(CFLAGS) -std=c++11
+# Win fallback
+else ifeq ($(platform), win)
    CC ?= gcc
    TARGET  := $(TARGET_NAME)_libretro.dll
    DEFINES += -DHAVE_FSEEKO -DHAVE_INTTYPES_H -fPIC
    CXXFLAGS += -fno-permissive
    LDFLAGS += -shared -static-libgcc -static-libstdc++ -s -Wl,--version-script=$(BUILD_PATH)/link.T -fPIC
+# OS X
+else ifeq ($(platform), osx)
+   TARGET  := $(TARGET_NAME)_libretro.dylib
+   DEFINES += -fPIC -Wno-undefined-var-template -Wno-pragma-pack -DHAVE_POSIX_MEMALIGN=1 -DUSE_CXX11
+   LDFLAGS += -dynamiclib -fPIC
+   CXXFLAGS := -std=c++11
+
+   ifeq ($(CROSS_COMPILE),1)
+      TARGET_RULE   = -target $(LIBRETRO_APPLE_PLATFORM) -isysroot $(LIBRETRO_APPLE_ISYSROOT)
+      CFLAGS   += $(TARGET_RULE)
+      CPPFLAGS += $(TARGET_RULE)
+      CXXFLAGS += $(TARGET_RULE)
+      LDFLAGS  += $(TARGET_RULE)
+      # Hardcode TARGET_64BIT for now
+      TARGET_64BIT = 1
+   endif
 endif
 
 ifeq ($(DEBUG), 1)
