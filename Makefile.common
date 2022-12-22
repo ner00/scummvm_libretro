@@ -94,7 +94,7 @@ INCLUDES  += -I$(DEPS_PATH)
 INCLUDES  += -I$(LIBRETRO_COMM_PATH)/include -I$(LIBRETRO_COMM_PATH)/include/compat
 OBJS_DEPS += $(LIBRETRO_COMM_PATH)/file/file_path_io.o \
 	$(LIBRETRO_COMM_PATH)/file/file_path.o \
-	$(LIBRETRO_COMM_PATH)/file/retro_PATHent.o \
+	$(LIBRETRO_COMM_PATH)/file/retro_dirent.o \
 	$(LIBRETRO_COMM_PATH)/vfs/vfs_implementation.o \
 	$(LIBRETRO_COMM_PATH)/string/stdstring.o \
 	$(LIBRETRO_COMM_PATH)/time/rtime.o
