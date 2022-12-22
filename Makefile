@@ -270,9 +270,10 @@ else ifeq ($(platform), miyoo)
    HAVE_MT32EMU = 0
    NO_HIGH_DEF := 1
 
-else ifneq (,$(or $(findstring armv7,$(platform)),$(findstring armv6,$(platform))))
+# ARM v7
+else ifneq (,$(findstring armv7,$(platform)))
    TARGET := $(TARGET_NAME)_libretro.so
-   DEFINES += -fPIC -D_ARM_ASSEM_ -DUSE_CXX11
+   DEFINES += -fPIC -D_ARM_ASSEM_ -DUSE_CXX11 -marm -DARM
    LDFLAGS += -shared -Wl,--version-script=$(BUILD_PATH)/link.T -fPIC
    USE_VORBIS = 0
    USE_THEORADEC = 0
@@ -284,7 +285,6 @@ ifneq (,$(findstring cortexa8,$(platform)))
 else ifneq (,$(findstring cortexa9,$(platform)))
    DEFINES += -marm -mcpu=cortex-a9
 endif
-   DEFINES += -marm
 ifneq (,$(findstring neon,$(platform)))
    DEFINES += -mfpu=neon
    HAVE_NEON = 1
@@ -294,20 +294,25 @@ ifneq (,$(findstring softfloat,$(platform)))
 else ifneq (,$(findstring hardfloat,$(platform)))
    DEFINES += -mfloat-abi=hard
 endif
-   DEFINES += -DARM
+
+# ARM v8
+else ifeq (,$(findstring armv8,$(platform)))
+   TARGET := $(TARGET_NAME)_libretro.so
+   DEFINES += -fPIC -D_ARM_ASSEM_ -DARM -marm -mtune=cortex-a53 -mfpu=neon-fp-armv8 -mfloat-abi=hard -march=armv8-a+crc
+   LDFLAGS += -shared -Wl,--version-script=$(BUILD_PATH)/link.T -fPIC
+   CFLAGS   += -fPIC
+   HAVE_NEON = 1
 
 # Odroid Go Advance
 else ifeq (,$(findstring oga_a35_neon_hardfloat,$(platform)))
    TARGET := $(TARGET_NAME)_libretro.so
-   DEFINES += -fPIC -D_ARM_ASSEM_
+   DEFINES += -fPIC -D_ARM_ASSEM_ -DARM -marm -mtune=cortex-a35 -mfpu=neon-fp-armv8 -mfloat-abi=hard -march=armv8-a+crc
    LDFLAGS += -shared -Wl,--version-script=$(BUILD_PATH)/link.T -fPIC
    USE_VORBIS = 0
    USE_THEORADEC = 0
    USE_TREMOR = 1
    HAVE_MT32EMU = 0
-   DEFINES +=  -marm -mtune=cortex-a35 -mfpu=neon-fp-armv8 -mfloat-abi=hard -march=armv8-a+crc
    HAVE_NEON = 1
-   DEFINES += -DARM
 
 # Emscripten
 else ifeq ($(platform), emscripten)
