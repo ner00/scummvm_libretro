@@ -270,15 +270,6 @@ else ifeq ($(platform), miyoo)
    HAVE_MT32EMU = 0
    NO_HIGH_DEF := 1
 
-else ifeq ($(platform), android-armv7)
-   TARGET  := $(TARGET_NAME)_libretro_android.so
-   DEFINES += -fPIC -D_ARM_ASSEM_
-   LDFLAGS += -shared -Wl,--version-script=$(BUILD_PATH)/link.T -fPIC
-   TOOLSET = arm-linux-androideabi-
-   USE_VORBIS = 0
-   USE_THEORADEC = 0
-   USE_TREMOR = 1
-   HAVE_MT32EMU = 0
 else ifneq (,$(or $(findstring armv7,$(platform)),$(findstring armv6,$(platform))))
    TARGET := $(TARGET_NAME)_libretro.so
    DEFINES += -fPIC -D_ARM_ASSEM_ -DUSE_CXX11
