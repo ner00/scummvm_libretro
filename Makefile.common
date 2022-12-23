@@ -25,13 +25,14 @@ HAVE_MT32EMU   ?= 1
 USE_FLUIDSYNTH ?= 1
 USE_LUA        ?= 1
 USE_LIBCO      ?= 1
-LOAD_RULES_MK  ?= 1
+LOAD_RULES_MK   = 1
 USE_TINYGL     ?= 1
 USE_BINK       ?= 1
 POSIX          ?= 1
 NO_HIGH_DEF    ?= 0
 NO_WIP         ?= 1
 USE_LIBCO      ?= 1
+ENABLE_VKEYBD   = 1
 
 # Paths
 SCUMMVM_PATH         := $(ROOT_PATH)/scummvm
@@ -50,7 +51,7 @@ CORE_NAME = "ScummVM mainline"
 CORE_EXTENSIONS = "scummvm"
 
 INCLUDES += -I$(SCUMMVM_PATH)
-DEFINES  += -D__LIBRETRO__ -DNONSTANDARD_PORT -DUSE_RGB_COLOR -DUSE_OSD -DDISABLE_TEXT_CONSOLE -DFRONTEND_SUPPORTS_RGB565 -DUSE_TRANSLATION -DDETECTION_STATIC -DHAVE_CONFIG_H -DUSE_BINK -DUSE_LUA -DUSE_TINYGL
+DEFINES  += -D__LIBRETRO__ -DNONSTANDARD_PORT -DUSE_RGB_COLOR -DUSE_OSD -DDISABLE_TEXT_CONSOLE -DFRONTEND_SUPPORTS_RGB565 -DUSE_TRANSLATION -DDETECTION_STATIC -DHAVE_CONFIG_H -DUSE_BINK -DUSE_LUA -DUSE_TINYGL -DENABLE_VKEYBD
 DEFINES  += -DCORE_NAME=\"$(CORE_NAME)\" -DCORE_EXTENSIONS=\"$(CORE_EXTENSIONS)\"
 DEFINES  += -Wno-multichar -Wno-unknown-pragmas -Wno-write-strings -Wno-undefined-var-template -Wno-pragma-pack
 ifneq ($(GIT_VERSION),unknown)
@@ -485,7 +486,7 @@ endif
 ######################################################################
 
 MODULES := test devtools base $(MODULES)
-INCLUDES    += -I$(SCUMMVM_PATH)/engines
+INCLUDES    += -I$(SCUMMVM_PATH)/engines -I$(SCUMMVM_PATH)/backends/vkeybd
 
 # Following script automatically generates configuration engines files (build/config.mk.engines, engines/engines.mk, engines/plugins_table.h, engines/detection_table.h) from actual source in $(SCUMMVM_PATH).
 #

@@ -66,6 +66,9 @@ read -a THEME_ARRAY -d '' -r <<< "${THEMES_LIST}"
 read -a DATAFILES_ARRAY -d '' -r <<< "$DATAFILES_LIST"
 set -e
 
+# Add specific data files
+DATAFILES_ARRAY[${#DATAFILES_ARRAY[@]}]="${SRC_PATH}"/backends/vkeybd/packs/vkeybd_default.zip
+
 # Make sure target folders exist
 [ $1 = "bundle" ] && mkdir -p "${TMP_PATH}/${BUNDLE_THEME_DIR}/"
 [ $1 = "bundle" ] && mkdir -p "${TMP_PATH}/${BUNDLE_DATAFILES_DIR}/"
