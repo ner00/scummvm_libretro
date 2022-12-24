@@ -117,10 +117,14 @@ unsigned retro_api_version(void)
 void retro_get_system_info(struct retro_system_info *info)
 {
    info->library_name = CORE_NAME;
-#ifndef GIT_VERSION
-#define GIT_VERSION ""
+#if defined GIT_TAG
+#define __GIT_VERSION GIT_TAG
+#elif defined GIT_HASH
+#define __GIT_VERSION GIT_HASH "-" SCUMMVM_VERSION
+#else
+#define __GIT_VERSION ""
 #endif
-   info->library_version = SCUMMVM_VERSION " " GIT_VERSION;
+   info->library_version = __GIT_VERSION;
    info->valid_extensions = "scummvm";
    info->need_fullpath = true;
    info->block_extract = false;
