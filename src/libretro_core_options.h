@@ -67,6 +67,26 @@ struct retro_core_option_definition option_defs_us[] = {
       "1.0"
    },
    {
+      "scummvm_gamepad_cursor_acceleration_time",
+      "Gamepad Cursor Acceleration",
+      "The amount of time (In seconds) it takes for the cursor to reach full speed",
+      {
+         { "off", NULL },
+         { "0.1", NULL },
+         { "0.2", NULL },
+         { "0.3", NULL },
+         { "0.4", NULL },
+         { "0.5", NULL },
+         { "0.6", NULL },
+         { "0.7", NULL },
+         { "0.8", NULL },
+         { "0.9", NULL },
+         { "1.0", NULL },
+         { NULL, NULL },
+      },
+      "0.2"
+   },
+   {
       "scummvm_analog_response",
       "Analog Cursor Response",
       "Determines how the speed of the cursor varies when tilting the RetroPad left analog stick. 'Linear': Speed is directly proportional to analog stick displacement. This is standard behaviour with which most users will be familiar. 'Quadratic': Speed increases quadratically with analog stick displacement. This allows for greater precision when making small movements without sacrificing maximum speed at full analog range. This mode may require practice for effective use.",
