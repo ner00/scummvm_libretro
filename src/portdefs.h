@@ -20,18 +20,18 @@
  *
  */
 
-#include <sys/types.h>
-#include <stdio.h>
-#include <fcntl.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdarg.h>
 #include <assert.h>
 #include <ctype.h>
+#include <fcntl.h>
+#include <limits.h>
 #include <math.h>
 #include <new>
-#include <limits.h>
+#include <stdarg.h>
 #include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
 
 /* newlib ctype.h defines _X for hex digit flag.
    This conflicts with the use of _X as a variable name. */
@@ -53,6 +53,6 @@
 #include <setjmp.h>
 #undef setjmp
 #undef longjmp
-#define setjmp(a) (__builtin_setjmp (a))
-#define longjmp(a,b) (__builtin_longjmp (a,b))
+#define setjmp(a) (__builtin_setjmp(a))
+#define longjmp(a, b) (__builtin_longjmp(a, b))
 #endif

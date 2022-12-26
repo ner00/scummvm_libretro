@@ -27,46 +27,41 @@
 #define FORBIDDEN_SYMBOL_EXCEPTION_time_h
 #define FORBIDDEN_SYMBOL_EXCEPTION_unistd_h
 #define FORBIDDEN_SYMBOL_EXCEPTION_mkdir
-#define FORBIDDEN_SYMBOL_EXCEPTION_exit		//Needed for IRIX's unistd.h
+#define FORBIDDEN_SYMBOL_EXCEPTION_exit // Needed for IRIX's unistd.h
 #ifdef PLAYSTATION3
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 #define FORBIDDEN_SYMBOL_ALLOW_ALL
 
 extern char *getwd(char *);
 extern int errno;
 
 #ifndef PATH_MAX
-#define PATH_MAX   1024
+#define PATH_MAX 1024
 #endif
 
-#define ERANGE          34               // Result too large
-#define ENOMEM          12               // Cannot allocate memory
+#define ERANGE 34 // Result too large
+#define ENOMEM 12 // Cannot allocate memory
 
-static inline char *getcwd (char *buf, size_t len)
-{
-   return 0;
-}
+static inline char *getcwd(char *buf, size_t len) { return 0; }
 #endif
 
 #include "libretro-fs-factory.h"
 #include "libretro-fs.h"
 
-AbstractFSNode *LibRetroFilesystemFactory::makeRootFileNode() const {
-	return new LibRetroFilesystemNode("/");
-}
+AbstractFSNode *LibRetroFilesystemFactory::makeRootFileNode() const { return new LibRetroFilesystemNode("/"); }
 
 AbstractFSNode *LibRetroFilesystemFactory::makeCurrentDirectoryFileNode() const {
 #ifdef PLAYSTATION3
-	return new LibRetroFilesystemNode("/");
+  return new LibRetroFilesystemNode("/");
 #else
-	char buf[MAXPATHLEN];
-	return getcwd(buf, MAXPATHLEN) ? new LibRetroFilesystemNode(buf) : NULL;
+  char buf[MAXPATHLEN];
+  return getcwd(buf, MAXPATHLEN) ? new LibRetroFilesystemNode(buf) : NULL;
 #endif
 }
 
 AbstractFSNode *LibRetroFilesystemFactory::makeFileNodePath(const Common::String &path) const {
-	assert(!path.empty());
-	return new LibRetroFilesystemNode(path);
+  assert(!path.empty());
+  return new LibRetroFilesystemNode(path);
 }
 #endif

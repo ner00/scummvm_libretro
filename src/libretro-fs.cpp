@@ -26,205 +26,200 @@
 #define FORBIDDEN_SYMBOL_EXCEPTION_unistd_h
 #define FORBIDDEN_SYMBOL_EXCEPTION_mkdir
 #define FORBIDDEN_SYMBOL_EXCEPTION_getenv
-#define FORBIDDEN_SYMBOL_EXCEPTION_exit		//Needed for IRIX's unistd.h
+#define FORBIDDEN_SYMBOL_EXCEPTION_exit // Needed for IRIX's unistd.h
 
 #include "libretro-fs.h"
 #include "backends/fs/stdiostream.h"
 #include "common/algorithm.h"
 
+#include "file/file_path.h"
 #include "retro_dirent.h"
 #include "retro_stat.h"
-#include "file/file_path.h"
-#include <stdio.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <stdio.h>
 
 void LibRetroFilesystemNode::setFlags() {
-	const char *fspath = _path.c_str();
+  const char *fspath = _path.c_str();
 
-	_isValid     = path_is_valid(fspath);
-	_isDirectory = path_is_directory(fspath);
+  _isValid = path_is_valid(fspath);
+  _isDirectory = path_is_directory(fspath);
 }
 
 LibRetroFilesystemNode::LibRetroFilesystemNode(const Common::String &p) {
-	assert(p.size() > 0);
+  assert(p.size() > 0);
 
-	// Expand "~/" to the value of the HOME env variable
-	if (p.hasPrefix("~/")) {
-		const char *home = getenv("HOME");
-		if (home != NULL && strlen(home) < MAXPATHLEN) {
-			_path = home;
-			// Skip over the tilda.  We know that p contains at least
-			// two chars, so this is safe:
-			_path += p.c_str() + 1;
-		}
-	} else {
-		_path = p;
-	}
+  // Expand "~/" to the value of the HOME env variable
+  if (p.hasPrefix("~/")) {
+    const char *home = getenv("HOME");
+    if (home != NULL && strlen(home) < MAXPATHLEN) {
+      _path = home;
+      // Skip over the tilda.  We know that p contains at least
+      // two chars, so this is safe:
+      _path += p.c_str() + 1;
+    }
+  } else {
+    _path = p;
+  }
 
-	// Normalize the path (that is, remove unneeded slashes etc.)
-	_path = Common::normalizePath(_path, '/');
-	_displayName = Common::lastPathComponent(_path, '/');
+  // Normalize the path (that is, remove unneeded slashes etc.)
+  _path = Common::normalizePath(_path, '/');
+  _displayName = Common::lastPathComponent(_path, '/');
 
-	setFlags();
+  setFlags();
 }
 
 AbstractFSNode *LibRetroFilesystemNode::getChild(const Common::String &n) const {
-	assert(!_path.empty());
-	assert(_isDirectory);
+  assert(!_path.empty());
+  assert(_isDirectory);
 
-	// Make sure the string contains no slashes
-	assert(!n.contains('/'));
+  // Make sure the string contains no slashes
+  assert(!n.contains('/'));
 
-	// We assume here that _path is already normalized (hence don't bother to call
-	//  Common::normalizePath on the final path).
-	Common::String newPath(_path);
-	if (_path.lastChar() != '/')
-		newPath += '/';
-	newPath += n;
+  // We assume here that _path is already normalized (hence don't bother to call
+  //  Common::normalizePath on the final path).
+  Common::String newPath(_path);
+  if (_path.lastChar() != '/')
+    newPath += '/';
+  newPath += n;
 
-	return makeNode(newPath);
+  return makeNode(newPath);
 }
 
 bool LibRetroFilesystemNode::getChildren(AbstractFSList &myList, ListMode mode, bool hidden) const {
-	assert(_isDirectory);
+  assert(_isDirectory);
 
-	struct RDIR *dirp = retro_opendir(_path.c_str());
+  struct RDIR *dirp = retro_opendir(_path.c_str());
 
-	if (dirp == NULL)
-		return false;
+  if (dirp == NULL)
+    return false;
 
-	// loop over dir entries using readdir
-	while ((retro_readdir(dirp))) {
-		const char *d_name = retro_dirent_get_name(dirp);
+  // loop over dir entries using readdir
+  while ((retro_readdir(dirp))) {
+    const char *d_name = retro_dirent_get_name(dirp);
 
-		// Skip 'invisible' files if necessary
-		if (d_name[0] == '.' && !hidden) {
-			continue;
-		}
-		// Skip '.' and '..' to avoid cycles
-		if ((d_name[0] == '.' && d_name[1] == 0) || (d_name[0] == '.' && d_name[1] == '.')) {
-			continue;
-		}
+    // Skip 'invisible' files if necessary
+    if (d_name[0] == '.' && !hidden) {
+      continue;
+    }
+    // Skip '.' and '..' to avoid cycles
+    if ((d_name[0] == '.' && d_name[1] == 0) || (d_name[0] == '.' && d_name[1] == '.')) {
+      continue;
+    }
 
-		// Start with a clone of this node, with the correct path set
-		LibRetroFilesystemNode entry(*this);
-		entry._displayName = d_name;
-		if (_path.lastChar() != '/')
-			entry._path += '/';
-		entry._path += entry._displayName;
+    // Start with a clone of this node, with the correct path set
+    LibRetroFilesystemNode entry(*this);
+    entry._displayName = d_name;
+    if (_path.lastChar() != '/')
+      entry._path += '/';
+    entry._path += entry._displayName;
 
-		entry._isValid     = true;
-		entry._isDirectory = retro_dirent_is_dir(dirp, entry._path.c_str());
+    entry._isValid = true;
+    entry._isDirectory = retro_dirent_is_dir(dirp, entry._path.c_str());
 
-		// Skip files that are invalid for some reason (e.g. because we couldn't
-		// properly stat them).
-		if (!entry._isValid)
-			continue;
+    // Skip files that are invalid for some reason (e.g. because we couldn't
+    // properly stat them).
+    if (!entry._isValid)
+      continue;
 
-		// Honor the chosen mode
-		if ((mode == Common::FSNode::kListFilesOnly && entry._isDirectory) ||
-		    (mode == Common::FSNode::kListDirectoriesOnly && !entry._isDirectory))
-			continue;
+    // Honor the chosen mode
+    if ((mode == Common::FSNode::kListFilesOnly && entry._isDirectory) || (mode == Common::FSNode::kListDirectoriesOnly && !entry._isDirectory))
+      continue;
 
-		myList.push_back(new LibRetroFilesystemNode(entry));
-	}
-	retro_closedir(dirp);
+    myList.push_back(new LibRetroFilesystemNode(entry));
+  }
+  retro_closedir(dirp);
 
-	return true;
+  return true;
 }
 
 AbstractFSNode *LibRetroFilesystemNode::getParent() const {
-	if (_path == "/")
-		return 0;	// The filesystem root has no parent
+  if (_path == "/")
+    return 0; // The filesystem root has no parent
 
-	const char *start = _path.c_str();
-	const char *end = start + _path.size();
+  const char *start = _path.c_str();
+  const char *end = start + _path.size();
 
-	// Strip of the last component. We make use of the fact that at this
-	// point, _path is guaranteed to be normalized
-	while (end > start && *(end-1) != '/')
-		end--;
+  // Strip of the last component. We make use of the fact that at this
+  // point, _path is guaranteed to be normalized
+  while (end > start && *(end - 1) != '/')
+    end--;
 
-	if (end == start) {
-		return 0;
-	}
+  if (end == start) {
+    return 0;
+  }
 
-	return makeNode(Common::String(start, end));
+  return makeNode(Common::String(start, end));
 }
 
-Common::SeekableReadStream *LibRetroFilesystemNode::createReadStream() {
-	return StdioStream::makeFromPath(getPath(), false);
-}
+Common::SeekableReadStream *LibRetroFilesystemNode::createReadStream() { return StdioStream::makeFromPath(getPath(), false); }
 
-Common::SeekableWriteStream *LibRetroFilesystemNode::createWriteStream() {
-	return StdioStream::makeFromPath(getPath(), true);
-}
+Common::SeekableWriteStream *LibRetroFilesystemNode::createWriteStream() { return StdioStream::makeFromPath(getPath(), true); }
 
 bool LibRetroFilesystemNode::createDirectory() {
-	if (path_mkdir(_path.c_str()))
-		setFlags();
+  if (path_mkdir(_path.c_str()))
+    setFlags();
 
-	return _isValid && _isDirectory;
+  return _isValid && _isDirectory;
 }
 
 namespace Posix {
 
 bool assureDirectoryExists(const Common::String &dir, const char *prefix) {
-	// Check whether the prefix exists if one is supplied.
-	if (prefix) {
-		if (!path_is_valid(prefix)) {
-			return false;
-		} else if (!path_is_directory(prefix)) {
-			return false;
-		}
-	}
+  // Check whether the prefix exists if one is supplied.
+  if (prefix) {
+    if (!path_is_valid(prefix)) {
+      return false;
+    } else if (!path_is_directory(prefix)) {
+      return false;
+    }
+  }
 
-	// Obtain absolute path.
-	Common::String path;
-	if (prefix) {
-		path = prefix;
-		path += '/';
-		path += dir;
-	} else {
-		path = dir;
-	}
+  // Obtain absolute path.
+  Common::String path;
+  if (prefix) {
+    path = prefix;
+    path += '/';
+    path += dir;
+  } else {
+    path = dir;
+  }
 
-	path = Common::normalizePath(path, '/');
+  path = Common::normalizePath(path, '/');
 
-	const Common::String::iterator end = path.end();
-	Common::String::iterator cur = path.begin();
-	if (*cur == '/')
-		++cur;
+  const Common::String::iterator end = path.end();
+  Common::String::iterator cur = path.begin();
+  if (*cur == '/')
+    ++cur;
 
-	do {
-		if (cur + 1 != end) {
-			if (*cur != '/') {
-				continue;
-			}
+  do {
+    if (cur + 1 != end) {
+      if (*cur != '/') {
+        continue;
+      }
 
-			// It is kind of ugly and against the purpose of Common::String to
-			// insert 0s inside, but this is just for a local string and
-			// simplifies the code a lot.
-			*cur = '\0';
-		}
+      // It is kind of ugly and against the purpose of Common::String to
+      // insert 0s inside, but this is just for a local string and
+      // simplifies the code a lot.
+      *cur = '\0';
+    }
 
-		if (!path_mkdir(path.c_str())) {
-			if (errno == EEXIST) {
-				if (!path_is_valid(path.c_str())) {
-					return false;
-				} else if (!path_is_directory(path.c_str())) {
-					return false;
-				}
-			} else {
-				return false;
-			}
-		}
+    if (!path_mkdir(path.c_str())) {
+      if (errno == EEXIST) {
+        if (!path_is_valid(path.c_str())) {
+          return false;
+        } else if (!path_is_directory(path.c_str())) {
+          return false;
+        }
+      } else {
+        return false;
+      }
+    }
 
-		*cur = '/';
-	} while (cur++ != end);
+    *cur = '/';
+  } while (cur++ != end);
 
-	return true;
+  return true;
 }
 
 } // End of namespace Posix

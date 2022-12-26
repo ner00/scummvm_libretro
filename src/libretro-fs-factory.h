@@ -32,9 +32,9 @@
  */
 class LibRetroFilesystemFactory : public FilesystemFactory {
 protected:
-	virtual AbstractFSNode *makeRootFileNode() const;
-	virtual AbstractFSNode *makeCurrentDirectoryFileNode() const;
-	virtual AbstractFSNode *makeFileNodePath(const Common::String &path) const;
+  virtual AbstractFSNode *makeRootFileNode() const;
+  virtual AbstractFSNode *makeCurrentDirectoryFileNode() const;
+  virtual AbstractFSNode *makeFileNodePath(const Common::String &path) const;
 };
 
 #endif /*LIBRETRO_FILESYSTEM_FACTORY_H*/

@@ -32,31 +32,26 @@
 
 #ifdef PLAYSTATION3
 #define FORBIDDEN_SYMBOL_ALLOW_ALL
-#define	F_OK		0	/* test for existence of file */
-#define	W_OK		0x02	/* test for write permission */
-#define	R_OK		0x04	/* test for read permission */
-
+#define F_OK 0    /* test for existence of file */
+#define W_OK 0x02 /* test for write permission */
+#define R_OK 0x04 /* test for read permission */
 
 #ifndef S_ISDIR
 #define S_ISDIR(x) (x & 0040000)
 #endif
 
-static inline int access(const char *pn, int mode)
-{
-   warning("access: pn %s\n", pn);
-   int fd = open(pn, O_RDONLY);
-   if (fd < 0)
-      return -1;
+static inline int access(const char *pn, int mode) {
+  warning("access: pn %s\n", pn);
+  int fd = open(pn, O_RDONLY);
+  if (fd < 0)
+    return -1;
 
-   // XXX lie about it, for now..
-   close(fd);
-   return 0;
+  // XXX lie about it, for now..
+  close(fd);
+  return 0;
 }
 
-static inline char *getenv(const char *name)
-{
-   return 0;
-}
+static inline char *getenv(const char *name) { return 0; }
 #endif
 
 /**
@@ -66,49 +61,47 @@ static inline char *getenv(const char *name)
  */
 class LibRetroFilesystemNode : public AbstractFSNode {
 protected:
-	Common::String _displayName;
-	Common::String _path;
-	bool _isDirectory;
-	bool _isValid;
+  Common::String _displayName;
+  Common::String _path;
+  bool _isDirectory;
+  bool _isValid;
 
-	virtual AbstractFSNode *makeNode(const Common::String &path) const {
-		return new LibRetroFilesystemNode(path);
-	}
+  virtual AbstractFSNode *makeNode(const Common::String &path) const { return new LibRetroFilesystemNode(path); }
 
-	/**
-	 * Plain constructor, for internal use only (hence protected).
-	 */
-	LibRetroFilesystemNode() : _isDirectory(false), _isValid(false) {}
+  /**
+   * Plain constructor, for internal use only (hence protected).
+   */
+  LibRetroFilesystemNode() : _isDirectory(false), _isValid(false) {}
 
 public:
-	/**
-	 * Creates a LibRetroFilesystemNode for a given path.
-	 *
-	 * @param path the path the new node should point to.
-	 */
-	LibRetroFilesystemNode(const Common::String &path);
+  /**
+   * Creates a LibRetroFilesystemNode for a given path.
+   *
+   * @param path the path the new node should point to.
+   */
+  LibRetroFilesystemNode(const Common::String &path);
 
-	virtual bool exists() const { return access(_path.c_str(), F_OK) == 0; }
-	virtual Common::U32String getDisplayName() const { return _displayName; }
-	virtual Common::String getName() const { return _displayName; }
-	virtual Common::String getPath() const { return _path; }
-	virtual bool isDirectory() const { return _isDirectory; }
-	virtual bool isReadable() const { return access(_path.c_str(), R_OK) == 0; }
-	virtual bool isWritable() const { return access(_path.c_str(), W_OK) == 0; }
+  virtual bool exists() const { return access(_path.c_str(), F_OK) == 0; }
+  virtual Common::U32String getDisplayName() const { return _displayName; }
+  virtual Common::String getName() const { return _displayName; }
+  virtual Common::String getPath() const { return _path; }
+  virtual bool isDirectory() const { return _isDirectory; }
+  virtual bool isReadable() const { return access(_path.c_str(), R_OK) == 0; }
+  virtual bool isWritable() const { return access(_path.c_str(), W_OK) == 0; }
 
-	virtual AbstractFSNode *getChild(const Common::String &n) const;
-	virtual bool getChildren(AbstractFSList &list, ListMode mode, bool hidden) const;
-	virtual AbstractFSNode *getParent() const;
+  virtual AbstractFSNode *getChild(const Common::String &n) const;
+  virtual bool getChildren(AbstractFSList &list, ListMode mode, bool hidden) const;
+  virtual AbstractFSNode *getParent() const;
 
-	virtual Common::SeekableReadStream *createReadStream();
-	virtual Common::SeekableWriteStream *createWriteStream();
-	virtual bool createDirectory();
+  virtual Common::SeekableReadStream *createReadStream();
+  virtual Common::SeekableWriteStream *createWriteStream();
+  virtual bool createDirectory();
 
 private:
-	/**
-	 * Tests and sets the _isValid and _isDirectory flags, using the stat() function.
-	 */
-	virtual void setFlags();
+  /**
+   * Tests and sets the _isValid and _isDirectory flags, using the stat() function.
+   */
+  virtual void setFlags();
 };
 
 namespace Posix {

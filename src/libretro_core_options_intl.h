@@ -4,7 +4,7 @@
 #if defined(_MSC_VER) && (_MSC_VER >= 1500 && _MSC_VER < 1900)
 /* https://support.microsoft.com/en-us/kb/980263 */
 #pragma execution_character_set("utf-8")
-#pragma warning(disable:4566)
+#pragma warning(disable : 4566)
 #endif
 
 #include <libretro.h>
@@ -25,7 +25,7 @@
  * - 1.1: Support generation of core options v0 retro_core_option_value
  *        arrays containing options with a single value
  * - 1.0: First commit
-*/
+ */
 
 #ifdef __cplusplus
 extern "C" {
@@ -35,7 +35,7 @@ extern "C" {
  ********************************
  * Core Option Definitions
  ********************************
-*/
+ */
 
 /* RETRO_LANGUAGE_JAPANESE */
 

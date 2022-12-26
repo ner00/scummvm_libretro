@@ -49,14 +49,14 @@ extern char cmd_params_num;
 extern int access(const char *path, int amode);
 #endif
 
-OSystem* retroBuildOS(bool aEnableSpeedHack);
-const Graphics::Surface& getScreen();
+OSystem *retroBuildOS(bool aEnableSpeedHack);
+const Graphics::Surface &getScreen();
 
 void retroProcessMouse(retro_input_state_t aCallback, int device, float gamepad_cursor_speed, float gamepad_acceleration_time, bool analog_response_is_quadratic, int analog_deadzone, float mouse_speed);
 void retroPostQuit();
 
-void retroSetSystemDir(const char* aPath);
-void retroSetSaveDir(const char* aPath);
+void retroSetSystemDir(const char *aPath);
+void retroSetSaveDir(const char *aPath);
 
 void retroKeyEvent(bool down, unsigned keycode, uint32_t character, uint16_t key_modifiers);
 
