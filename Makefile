@@ -18,7 +18,7 @@ ifeq ($(shell uname -a),)
 endif
 
 ifeq ($(BUILD_64BIT),)
-ifeq (,$(findstring 64,$(shell uname -m)))
+ifeq (,$(findstring 64,$(platform)))
    BUILD_64BIT := 0
 else
    BUILD_64BIT := 1
@@ -399,23 +399,33 @@ else ifeq ($(platform), unix)
 
 else
    # Nothing found for specified platform or none set
-   platform = unix
-	ifeq ($(shell uname -a),)
-	   platform = win
-	else ifneq ($(findstring MINGW,$(shell uname -a)),)
-	   platform = win
-	else ifneq ($(findstring Darwin,$(shell uname -a)),)
-	   platform = osx
-	   arch = intel
-	ifeq ($(shell uname -p),arm64)
-	   arch = arm
-	endif
-	ifeq ($(shell uname -p),powerpc)
-	   arch = ppc
-	endif
-	else ifneq ($(findstring win,$(shell uname -a)),)
-	   platform = win
-	endif
+
+   override platform = unix
+   ifeq ($(shell uname -a),)
+      override platform = win
+   else ifneq ($(findstring MINGW,$(shell uname -a)),)
+      override platform = win
+   else ifneq ($(findstring Darwin,$(shell uname -a)),)
+      override platform = osx
+      override arch = intel
+      ifeq ($(shell uname -p),arm64)
+         override arch = arm
+      endif
+      ifeq ($(shell uname -p),powerpc)
+         override arch = ppc
+      endif
+   else ifneq ($(findstring win,$(shell uname -a)),)
+      override platform = win
+   endif
+
+   ifeq ($(BUILD_64BIT),)
+      ifeq (,$(findstring 64,$(shell uname -m)))
+         BUILD_64BIT := 0
+      else
+         BUILD_64BIT := 1
+      endif
+   endif
+   TARGET_64BIT := $(BUILD_64BIT)
 endif
 
 # Unix fallback
