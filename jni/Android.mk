@@ -1,5 +1,5 @@
 LOCAL_PATH  := $(call my-dir)
-ROOT_PATH   := $(LOCAL_PATH)/../..
+ROOT_PATH   := $(LOCAL_PATH)/..
 TARGET_NAME := scummvm_mainline
 
 # Reset flags not reset to  Makefile.common
@@ -28,7 +28,7 @@ LOCAL_SRC_FILES       := $(DETECT_OBJS:%.o=$(SCUMMVM_PATH)/%.cpp)  $(OBJS_DEPS:%
 LOCAL_C_INCLUDES      := $(subst -I,,$(INCLUDES))
 LOCAL_CPPFLAGS        := $(COREFLAGS) -std=c++11
 LOCAL_CFLAGS          := $(COREFLAGS)
-LOCAL_LDFLAGS         := -Wl,-version-script=$(BUILD_PATH)/link.T
+LOCAL_LDFLAGS         := -Wl,-version-script=$(ROOT_PATH)/link.T
 LOCAL_LDLIBS          := -lz -llog
 LOCAL_CPP_FEATURES    := rtti
 LOCAL_ARM_MODE        := arm

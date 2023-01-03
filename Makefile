@@ -38,7 +38,7 @@ RM_REC    = rm -rf
 ifeq ($(platform), rpi3_64)
    TARGET   = $(TARGET_NAME)_libretro.so
    DEFINES += -fPIC -D_ARM_ASSEM_ -DUSE_CXX11 -DARM
-   LDFLAGS += -shared -Wl,--version-script=$(BUILD_PATH)/link.T -fPIC
+   LDFLAGS += -shared -Wl,--version-script=$(ROOT_PATH)/link.T -fPIC
    CFLAGS  += -fPIC -mcpu=cortex-a53 -mtune=cortex-a53 -fomit-frame-pointer -ffast-math
    CXXFLAGS = $(CFLAGS) -frtti -std=c++11
 
@@ -46,7 +46,7 @@ ifeq ($(platform), rpi3_64)
 else ifeq ($(platform), rpi4_64)
    TARGET = $(TARGET_NAME)_libretro.so
    DEFINES += -fPIC -D_ARM_ASSEM_ -DUSE_CXX11 -DARM
-   LDFLAGS += -shared -Wl,--version-script=$(BUILD_PATH)/link.T -fPIC
+   LDFLAGS += -shared -Wl,--version-script=$(ROOT_PATH)/link.T -fPIC
    CFLAGS += -fPIC -mcpu=cortex-a72 -mtune=cortex-a72 -fomit-frame-pointer -ffast-math
    CXXFLAGS = $(CFLAGS) -frtti -std=c++11
 
@@ -91,7 +91,7 @@ endif
 else ifeq ($(platform), qnx)
    TARGET  := $(TARGET_NAME)_libretro_$(platform).so
    DEFINES += -fPIC -DSYSTEM_NOT_SUPPORTING_D_TYPE
-   LDFLAGS += -shared -Wl,--version-script=$(BUILD_PATH)/link.T -fPIC
+   LDFLAGS += -shared -Wl,--version-script=$(ROOT_PATH)/link.T -fPIC
    CC = qcc -Vgcc_ntoarmv7le
    CXX = QCC -Vgcc_ntoarmv7le
    LD = QCC -Vgcc_ntoarmv7le
@@ -200,7 +200,7 @@ else ifeq ($(platform), gcw0)
    RANLIB = /opt/gcw0-toolchain/usr/bin/mipsel-linux-ranlib
    DEFINES += -DDINGUX -fomit-frame-pointer -ffast-math -march=mips32 -mtune=mips32r2 -mhard-float -fPIC
    DEFINES += -ffunction-sections -fdata-sections
-   LDFLAGS += -shared -Wl,--gc-sections -Wl,--version-script=$(BUILD_PATH)/link.T -fPIC
+   LDFLAGS += -shared -Wl,--gc-sections -Wl,--version-script=$(ROOT_PATH)/link.T -fPIC
    USE_VORBIS = 0
    USE_THEORADEC = 0
    USE_TREMOR = 1
@@ -218,7 +218,7 @@ else ifeq ($(platform), miyoo)
    RANLIB = /opt/miyoo/usr/bin/arm-linux-ranlib
    DEFINES += -DDINGUX -fomit-frame-pointer -ffast-math -march=armv5te -mtune=arm926ej-s -fPIC
    DEFINES += -ffunction-sections -fdata-sections
-   LDFLAGS += -shared -Wl,--gc-sections -Wl,--version-script=$(BUILD_PATH)/link.T -fPIC
+   LDFLAGS += -shared -Wl,--gc-sections -Wl,--version-script=$(ROOT_PATH)/link.T -fPIC
    USE_VORBIS = 0
    USE_THEORADEC = 0
    USE_TREMOR = 1
@@ -236,7 +236,7 @@ else ifeq ($(platform), miyoomini)
    RANLIB = /usr/bin/arm-linux-gnueabihf-ranlib
    DEFINES += -fomit-frame-pointer -ffast-math -marm -march=armv7ve+simd -mtune=cortex-a7 -fPIC
    DEFINES += -ffunction-sections -fdata-sections
-   LDFLAGS += -shared -Wl,--gc-sections -Wl,--version-script=$(BUILD_PATH)/link.T -fPIC
+   LDFLAGS += -shared -Wl,--gc-sections -Wl,--version-script=$(ROOT_PATH)/link.T -fPIC
    USE_VORBIS = 0
    USE_THEORADEC = 0
    USE_TREMOR = 1
@@ -248,7 +248,7 @@ else ifeq ($(platform), miyoomini)
 else ifneq (,$(findstring armv7,$(platform)))
    TARGET := $(TARGET_NAME)_libretro.so
    DEFINES += -fPIC -D_ARM_ASSEM_ -DUSE_CXX11 -marm -DARM
-   LDFLAGS += -shared -Wl,--version-script=$(BUILD_PATH)/link.T -fPIC
+   LDFLAGS += -shared -Wl,--version-script=$(ROOT_PATH)/link.T -fPIC
    USE_VORBIS = 0
    USE_THEORADEC = 0
    USE_TREMOR = 1
@@ -273,7 +273,7 @@ endif
 else ifneq (,$(findstring armv8,$(platform)))
    TARGET := $(TARGET_NAME)_libretro.so
    DEFINES += -fPIC -D_ARM_ASSEM_ -DARM -marm -mtune=cortex-a53 -mfpu=neon-fp-armv8 -mfloat-abi=hard -march=armv8-a+crc
-   LDFLAGS += -shared -Wl,--version-script=$(BUILD_PATH)/link.T -fPIC
+   LDFLAGS += -shared -Wl,--version-script=$(ROOT_PATH)/link.T -fPIC
    CFLAGS   += -fPIC
    HAVE_NEON = 1
 
@@ -281,7 +281,7 @@ else ifneq (,$(findstring armv8,$(platform)))
 else ifneq (,$(findstring oga_a35_neon_hardfloat,$(platform)))
    TARGET := $(TARGET_NAME)_libretro.so
    DEFINES += -fPIC -D_ARM_ASSEM_ -DARM -marm -mtune=cortex-a35 -mfpu=neon-fp-armv8 -mfloat-abi=hard -march=armv8-a+crc
-   LDFLAGS += -shared -Wl,--version-script=$(BUILD_PATH)/link.T -fPIC
+   LDFLAGS += -shared -Wl,--version-script=$(ROOT_PATH)/link.T -fPIC
    USE_VORBIS = 0
    USE_THEORADEC = 0
    USE_TREMOR = 1
@@ -432,7 +432,7 @@ endif
 ifeq ($(platform), unix)
    TARGET   := $(TARGET_NAME)_libretro.so
    DEFINES  += -DHAVE_POSIX_MEMALIGN=1 -DUSE_CXX11
-   LDFLAGS  += -shared -Wl,--version-script=$(BUILD_PATH)/link.T -fPIC
+   LDFLAGS  += -shared -Wl,--version-script=$(ROOT_PATH)/link.T -fPIC
    CFLAGS   += -fPIC
    CXXFLAGS += $(CFLAGS) -std=c++11
 # Win fallback
@@ -441,7 +441,7 @@ else ifeq ($(platform), win)
    TARGET  := $(TARGET_NAME)_libretro.dll
    DEFINES += -DHAVE_FSEEKO -DHAVE_INTTYPES_H -fPIC
    CXXFLAGS += -fno-permissive
-   LDFLAGS += -shared -static-libgcc -static-libstdc++ -s -Wl,--version-script=$(BUILD_PATH)/link.T -fPIC
+   LDFLAGS += -shared -static-libgcc -static-libstdc++ -s -Wl,--version-script=$(ROOT_PATH)/link.T -fPIC
 # OS X
 else ifeq ($(platform), osx)
    TARGET  := $(TARGET_NAME)_libretro.dylib

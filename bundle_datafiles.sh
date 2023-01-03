@@ -47,14 +47,14 @@ function process_group(){
 
 # Set variables
 BUILD_PATH=$(pwd)
-SRC_PATH="${BUILD_PATH}/../scummvm"
+SRC_PATH="${BUILD_PATH}/scummvm"
 TMP_PATH="${BUILD_PATH}/tmp_data"
-TARGET_PATH="${BUILD_PATH}/.."
+TARGET_PATH="${BUILD_PATH}"
 BUNDLE_DIR="scummvm"
 BUNDLE_DATAFILES_DIR="${BUNDLE_DIR}/extra"
 BUNDLE_THEME_DIR="${BUNDLE_DIR}/theme"
 BUNDLE_ZIP_FILE="${BUNDLE_DIR}.zip"
-BUNDLE_LOCAL_DATAFILES_DIR="${BUILD_PATH}/../dist"
+BUNDLE_LOCAL_DATAFILES_DIR="${BUILD_PATH}/dist"
 
 # Retrieve data file info from ScummVM source
 THEMES_LIST=$(cat "${SRC_PATH}/dists/scummvm.rc" 2>/dev/null | grep FILE.*gui/themes.*\.zip | sed "s|.*\"\(.*\)\"|${SRC_PATH}/\1|g")

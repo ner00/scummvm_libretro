@@ -36,7 +36,6 @@ ENABLE_VKEYBD   = 1
 
 # Paths
 SCUMMVM_PATH         := $(ROOT_PATH)/scummvm
-BUILD_PATH           := $(ROOT_PATH)/build
 CORE_PATH            := $(ROOT_PATH)/src
 DEPS_PATH            := $(ROOT_PATH)/libretro-deps
 LIBRETRO_COMM_PATH   := $(ROOT_PATH)/libretro-common
@@ -500,13 +499,13 @@ INCLUDES    += -I$(SCUMMVM_PATH)/engines -I$(SCUMMVM_PATH)/backends/vkeybd
 
 ifeq (,$(filter clean,$(MAKECMDGOALS)))
 $(info Configuring ScummVM engines...)
-ifneq ($(shell cd $(BUILD_PATH); ./configure_engines.sh $(NO_HIGH_DEF) $(NO_WIP)),0)
+ifneq ($(shell cd $(ROOT_PATH); ./configure_engines.sh $(NO_HIGH_DEF) $(NO_WIP)),0)
    $(error Configuring ScummVM engines failed)
 endif
 endif
 
 ifeq ($(LITE), 1)
-   include $(BUILD_PATH)/config.mk.engines.lite
+   include $(ROOT_PATH)/config.mk.engines.lite
 else
    include $(SCUMMVM_PATH)/config.mk.engines
 endif
@@ -541,10 +540,10 @@ all: $(TARGET) scummvm.zip $(TARGET_NAME)_libretro.info
 #bundle_files
 scummvm.zip: $(SCUMMVM_PATH)/dists/scummvm.rc
 	@echo Preparing $@
-	@cd $(BUILD_PATH); ./bundle_datafiles.sh bundle $(TARGET_NAME)
+	@cd $(ROOT_PATH); ./bundle_datafiles.sh bundle $(TARGET_NAME)
 
 $(TARGET_NAME)_libretro.info: $(SCUMMVM_PATH)/dists/scummvm.rc
 	@echo Preparing $@
-	@cd $(BUILD_PATH); ./bundle_datafiles.sh info $(TARGET_NAME) $(CORE_NAME) $(CORE_EXTENSIONS)
+	@cd $(ROOT_PATH); ./bundle_datafiles.sh info $(TARGET_NAME) $(CORE_NAME) $(CORE_EXTENSIONS)
 
 .PHONY: all

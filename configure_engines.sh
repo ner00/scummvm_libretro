@@ -18,7 +18,7 @@
 set -e
 
 BUILD_PATH=$(pwd)
-SRC_PATH="${BUILD_PATH}/../scummvm"
+SRC_PATH="${BUILD_PATH}/scummvm"
 
 cd "${SRC_PATH}"
 
