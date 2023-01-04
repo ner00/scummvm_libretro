@@ -1,7 +1,7 @@
 ROOT_PATH := .
 
 # Output files prefix
-TARGET_NAME = scummvm_mainline
+TARGET_NAME = scummvm
 
 HIDE := @
 SPACE :=
