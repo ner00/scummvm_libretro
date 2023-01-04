@@ -7,8 +7,9 @@
 # Core definitions
 .core-defs:
   variables:
-    JNI_PATH: jni
+    JNI_PATH: .
     CORENAME: scummvm
+    GIT_SUBMODULE_STRATEGY: recursive
 
 .win-defs:
   variables:
