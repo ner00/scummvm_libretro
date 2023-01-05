@@ -1,4 +1,4 @@
-CREATE scummvm_mainline_libretro_wiiu.a
+CREATE scummvm_libretro_wiiu.a
 ADDLIB libtemp/libagi.a
 ADDLIB libtemp/libagos.a
 ADDLIB libtemp/libaudio.a

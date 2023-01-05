@@ -1,4 +1,4 @@
-CREATE scummvm_mainline_libretro_libnx.a
+CREATE scummvm_libretro_libnx.a
 ADDLIB libtemp/libbladerunner.a
 ADDLIB libtemp/libchewy.a
 ADDLIB libtemp/libcryo.a

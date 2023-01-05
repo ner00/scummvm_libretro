@@ -1,6 +1,6 @@
 LOCAL_PATH  := $(call my-dir)
 ROOT_PATH   := $(LOCAL_PATH)/..
-TARGET_NAME := scummvm_mainline
+TARGET_NAME := scummvm
 
 # Reset flags not reset to  Makefile.common
 DEFINES   :=
