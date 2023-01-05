@@ -64,7 +64,7 @@ ifeq ($(platform),ios-arm64)
   CC        = cc -arch arm64 -isysroot $(IOSSDK)
   CXX       = c++ -arch arm64 -isysroot $(IOSSDK)
 else
-   CC       = cc -arch armv7 -isysroot $(IOSSDK)
+   CC       = cc -arch armv7 -isysroot $(IOSSDK) -marm
    CXX      = c++ -arch armv7 -isysroot $(IOSSDK)
 endif
 
