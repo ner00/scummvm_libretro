@@ -23,7 +23,7 @@ SRC_PATH="${BUILD_PATH}/scummvm"
 cd "${SRC_PATH}"
 
 # Retrieve all configure functions
-sed -i "s/exit 0/return 0/g" configure
+sed -i.bak -e "s/exit 0/return 0/g" configure
 . configure -h > /dev/null 2>&1
 
 # Collect all default engines dependencies and force to yes
@@ -56,6 +56,6 @@ copy_if_changed engines/detection_table.h.new "engines/detection_table.h"
 copy_if_changed engines/plugins_table.h.new "engines/plugins_table.h"
 
 # Test NO_WIP
-[ $2 -ne 1 ] && sed -i "s/# \(.*\)/\1 = STATIC_PLUGIN/g" "config.mk.engines"
+[ $2 -ne 1 ] && sed -i.bak -e "s/# \(.*\)/\1 = STATIC_PLUGIN/g" "config.mk.engines"
 
 echo 0
