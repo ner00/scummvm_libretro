@@ -4,7 +4,7 @@
 	ignore = dirty
 [submodule "libretro-deps"]
 	path = libretro-deps
-	url = https://github.com/spleen1981/libretro-deps
+	url = https://github.com/libretro/libretro-deps
 	ignore = dirty
 [submodule "libretro-common"]
 	path = libretro-common
