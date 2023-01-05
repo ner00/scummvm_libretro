@@ -74,7 +74,7 @@ else
    MINVERSION += -miphoneos-version-min=5.0
 endif
   CFLAGS   += $(MINVERSION)
-  CXXFLAGS += $(MINVERSION)
+  CXXFLAGS += $(MINVERSION) -std=c++11
 
 else ifeq ($(platform), tvos-arm64)
    EXT?=dylib
@@ -85,7 +85,7 @@ ifeq ($(IOSSDK),)
    IOSSDK := $(shell xcodebuild -version -sdk appletvos Path)
 endif
    CC  = cc -arch arm64 -isysroot $(IOSSDK)
-   CXX = c++ -arch arm64 -isysroot $(IOSSDK)
+   CXX = c++ -arch arm64 -isysroot $(IOSSDK) -std=c++11
 
 # QNX
 else ifeq ($(platform), qnx)
