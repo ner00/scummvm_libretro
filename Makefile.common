@@ -122,7 +122,8 @@ endif
 ifeq ($(USE_FLUIDSYNTH), 1)
 DEFINES += -DUSE_FLUIDSYNTH -DUSE_FLUIDLITE
 INCLUDES += -I$(DEPS_PATH)/fluidsynth/include \
-	-I$(DEPS_PATH)/fluidsynth/src
+	-I$(DEPS_PATH)/fluidsynth/src \
+	-I$(DEPS_PATH)/libvorbis/include
 OBJS_DEPS += $(DEPS_PATH)/fluidsynth/src/fluid_chan.o \
 	$(DEPS_PATH)/fluidsynth/src/fluid_chorus.o \
 	$(DEPS_PATH)/fluidsynth/src/fluid_conv.o \
