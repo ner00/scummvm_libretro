@@ -199,8 +199,9 @@ else ifeq ($(platform), gcw0)
    AR = /opt/gcw0-toolchain/usr/bin/mipsel-linux-ar cru
    RANLIB = /opt/gcw0-toolchain/usr/bin/mipsel-linux-ranlib
    DEFINES += -DDINGUX -fomit-frame-pointer -ffast-math -march=mips32 -mtune=mips32r2 -mhard-float -fPIC
-   DEFINES += -ffunction-sections -fdata-sections -DPNG_RESTRICT
+   DEFINES += -ffunction-sections -fdata-sections -DPNG_RESTRICT=restrict
    CXXFLAGS += -std=gnu++11
+   CFLAGS += -std=c99
    LDFLAGS += -shared -Wl,--gc-sections -Wl,--version-script=$(ROOT_PATH)/link.T -fPIC
    USE_VORBIS = 0
    USE_THEORADEC = 0
