@@ -54,7 +54,7 @@ else
 endif
 
 # Nice name shown in frontend
-CORE_NAME = "ScummVM mainline"
+CORE_NAME = "ScummVM"
 # Pipe separated allowed file extensions that core can handle
 CORE_EXTENSIONS = "scummvm"
 
