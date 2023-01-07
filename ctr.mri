@@ -40,10 +40,7 @@ ADDLIB libtemp/libtucker.a
 ADDLIB libtemp/libvideo.a
 ADDLIB libtemp/libvoyeur.a
 ADDLIB libtemp/libxeen.a
-ADDMOD libtemp/libco.o
 ADDMOD libtemp/libretro.o
 ADDMOD libtemp/libretro_os.o
-ADDMOD libtemp/file_path.o
-ADDMOD libtemp/file_path_io.o
 SAVE
 END

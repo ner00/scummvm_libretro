@@ -37,6 +37,5 @@ ADDLIB libtemp/libtucker.a
 ADDLIB libtemp/libvideo.a
 ADDMOD libtemp/libretro.o
 ADDMOD libtemp/libretro_os.o
-ADDMOD libtemp/libco.o
 SAVE
 END

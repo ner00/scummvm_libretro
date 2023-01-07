@@ -82,9 +82,6 @@ ADDLIB libtemp/libbbvs.a
 ADDLIB libtemp/libgroovie.a
 ADDLIB libtemp/libgob.a
 ADDMOD libtemp/libretro.o
-ADDMOD libtemp/file_path.o
-ADDMOD libtemp/file_path_io.o
 ADDMOD libtemp/libretro_os.o
-ADDMOD libtemp/libco.o
 SAVE
 END
