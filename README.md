@@ -10,12 +10,14 @@ As current official ScummVM libretro core is based on a very old fork of ScummVM
 * Datafiles and themes bundle (`scummvm.zip`) and `core.info` files are built automatically based on current submodule source
 
 ## Build
-To build with the default configuration type in a shell the following:
+To build with the default configuration the core only type in a shell the following:
 ```
 git clone --recursive https://github.com/libretro/scummvm
 cd scummvm
 make
 ```
+Use `make all` to build the core along with datafiles (`scummvm.zip`) and core info file (which can be built separately with `make datafiles`/`make infofile`).
+
 "Work in progress" engines are not built by default, to include them pass `NO_WIP=0` to make.
 
 ### Build for Android
@@ -45,4 +47,4 @@ Some additional options have been added to this core:
 ## Resources
 Official ScummVM repository readme is [here](https://github.com/scummvm/scummvm#readme).
 
-[Legacy ScummVM libretro core](https://github.com/libretro/scummvm#readme) documentation is [here](https://docs.libretro.com/library/scummvm).
+[Legacy ScummVM libretro core](https://github.com/libretro-mirrors/scummvm) documentation is [here](https://docs.libretro.com/library/scummvm).
