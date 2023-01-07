@@ -139,6 +139,7 @@ else ifeq ($(platform), libnx)
     include $(DEVKITPRO)/libnx/switch_rules
     EXT=a
     TARGET := $(TARGET_NAME)_libretro_$(platform).$(EXT)
+    AR = $(DEVKITPRO)/devkitA64/aarch64-none-elf/bin/ar$(EXE_EXT) rcs
     DEFINES := -DSWITCH=1 -U__linux__ -U__linux
     DEFINES   += -g -O3 -fPIE -I$(LIBNX)/include/ -ffunction-sections -fdata-sections -ftls-model=local-exec
     DEFINES += $(INCDIRS)
