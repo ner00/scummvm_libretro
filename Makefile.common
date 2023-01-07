@@ -107,9 +107,9 @@ OBJS_DEPS += $(LIBRETRO_COMM_PATH)/file/file_path_io.o \
 
 
 ifeq ($(USE_LIBCO), 1)
-OBJS_DEPS += $(LIBRETRO_COMM_PATH)/libco/libco.o
+OBJS += $(LIBRETRO_COMM_PATH)/libco/libco.o
 ifeq ($(platform), genode)
-OBJS_DEPS += $(LIBRETRO_COMM_PATH)/libco/genode.o
+OBJS += $(LIBRETRO_COMM_PATH)/libco/genode.o
 endif
 endif
 
