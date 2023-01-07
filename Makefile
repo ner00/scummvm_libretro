@@ -578,13 +578,8 @@ $(TARGET): $(DETECT_OBJS) $(OBJS) libdeps.a
 endif
 
 libdeps.a: $(OBJS_DEPS)
-ifeq ($(platform), libnx)
 	@echo Linking $@...
-	$(HIDE)$(AR) -rc $@ $^
-else
-		@echo Linking $@...
-		$(HIDE)$(AR) $@ $^
-endif
+	$(HIDE)$(AR) $@ $^
 
 %.o: %.c
 	@echo Compiling $(<F)...
