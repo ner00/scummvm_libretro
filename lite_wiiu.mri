@@ -8,6 +8,7 @@ ADDLIB libtemp/libcine.a
 ADDLIB libtemp/libcommon.a
 ADDLIB libtemp/libcruise.a
 ADDLIB libtemp/libdeps.a
+ADDLIB libtemp/libdetect.a
 ADDLIB libtemp/libdraci.a
 ADDLIB libtemp/libdrascula.a
 ADDLIB libtemp/libengines.a
