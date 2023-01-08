@@ -38,5 +38,7 @@ ADDLIB libtemp/libtucker.a
 ADDLIB libtemp/libvideo.a
 ADDMOD libtemp/libretro.o
 ADDMOD libtemp/libretro_os.o
+ADDMOD libtemp/libretro-fs.o
+ADDMOD libtemp/libretro-fs-factory.o
 SAVE
 END
