@@ -541,6 +541,7 @@ POST_MODULES += \
 
 ifeq ($(HAVE_MT32EMU),1)
    POST_MODULES += audio/softsynth/mt32
+   INCLUDES    += -I$(SCUMMVM_PATH)/audio/softsynth/mt32/sha1
    DEFINES += -DUSE_MT32EMU
 endif
 
