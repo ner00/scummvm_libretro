@@ -132,7 +132,8 @@ firmware_count = $count
 EOF
 	set -e
 
-	CORE_INFO_CONTENT="${CORE_INFO_CONTENT}${CORE_INFO_DATS}"
+	CORE_INFO_CONTENT="${CORE_INFO_CONTENT}${CORE_INFO_DATS}
+description = \"The ScummVM adventure game engine ported to libretro. This core is built directly from the upstream repo and is synced upon stable releases, though it is not supported upstream. So please report any bug to Libretro and/or make sure the same apply to the standalone ScummVM program as well, before making any report to ScummVM Team.\""
 	echo "$CORE_INFO_CONTENT" > "${TARGET_PATH}/${2}_libretro.info"
 	echo "${2}_libretro.info created successfully"
 else
