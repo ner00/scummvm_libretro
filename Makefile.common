@@ -496,9 +496,11 @@ endif
 # Module settings
 ######################################################################
 
-PRE_MODULES := base
-MODULES := test devtools $(PRE_MODULES) $(MODULES)
 INCLUDES    += -I$(SCUMMVM_PATH)/engines -I$(SCUMMVM_PATH)/backends/vkeybd
+
+# Base modules
+BASE_MODULES := base
+MODULES += $(BASE_MODULES)
 
 # script.mri head
 ifeq ($(STATIC_LINKING),1)
@@ -528,7 +530,7 @@ endif
 include $(SCUMMVM_PATH)/engines/engines.mk
 
 # Shared modules
-POST_MODULES += \
+SHARED_MODULES := base \
 	engines \
 	gui \
 	backends \
@@ -540,19 +542,16 @@ POST_MODULES += \
 	common
 
 ifeq ($(HAVE_MT32EMU),1)
-   POST_MODULES += audio/softsynth/mt32
+   SHARED_MODULES += audio/softsynth/mt32
    INCLUDES    += -I$(SCUMMVM_PATH)/audio/softsynth/mt32/sha1
    DEFINES += -DUSE_MT32EMU
 endif
 
-MODULES += $(POST_MODULES) \
-	po \
-	doc
-
+MODULES += $(SHARED_MODULES)
 
 # script.mri tail
 ifeq ($(STATIC_LINKING),1)
-   $(shell printf "$(addprefix ADDLIB libtemp/lib, $(addsuffix .a\n,$(notdir $(PRE_MODULES) $(POST_MODULES))))" >> $(ROOT_PATH)/script.mri)
+   $(shell printf "$(addprefix ADDLIB libtemp/lib, $(addsuffix .a\n,$(notdir $(BASE_MODULES) $(SHARED_MODULES))))" >> $(ROOT_PATH)/script.mri)
    $(shell printf "ADDLIB libtemp/libdeps.a\n" >> $(ROOT_PATH)/script.mri)
    $(shell printf "ADDLIB libtemp/libdetect.a\n" >> $(ROOT_PATH)/script.mri)
    $(shell printf "$(addprefix ADDMOD libtemp/, $(addsuffix \n,$(notdir $(LIBRETRO_OBJS))))" >> $(ROOT_PATH)/script.mri)

@@ -47,9 +47,9 @@ for a in $_engines ; do
 		[ $found -eq 0 ] && tot_deps+=" $dep"
 	done
 
+	# Static linking support files
 	not_subengine_var=_engine_${a}_sub
 	not_wip_engine_var=_engine_${a}_build_default
-	# Static linking support files
 	if [ $3 -eq 1 ] && [ -z ${!not_subengine_var} ] ; then
 		good_to_go=1
 		# Test NO_HIGH_DEF
