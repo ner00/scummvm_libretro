@@ -155,7 +155,7 @@ else ifeq ($(platform), wiiu)
    CXX = $(DEVKITPPC)/bin/powerpc-eabi-g++$(EXE_EXT)
    AR = $(DEVKITPPC)/bin/powerpc-eabi-ar$(EXE_EXT) rcs
    AR_ALONE = $(DEVKITPPC)/bin/powerpc-eabi-ar$(EXE_EXT)
-   DEFINES += -DGEKKO -mcpu=750 -meabi -mhard-float -D__POWERPC__ -D__ppc__ -DWORDS_BIGENDIAN=1 -DMSB_FIRST
+   DEFINES += -DGEKKO -mwup -mcpu=750 -meabi -mhard-float -D__POWERPC__ -D__ppc__ -DWORDS_BIGENDIAN=1 -DMSB_FIRST
    DEFINES += -U__INT32_TYPE__ -U __UINT32_TYPE__ -D__INT32_TYPE__=int -fpermissive
    DEFINES += -DHAVE_STRTOUL -DWIIU -I$(LIBRETRO_COMM_PATH)/include
    LITE := 1
@@ -557,19 +557,19 @@ ifeq ($(platform), wiiu)
 $(TARGET): $(OBJS) libdeps.a libdetect.a
 	$(MKDIR) libtemp
 	$(CP) $+ libtemp/
-	$(AR_ALONE) -M < lite_wiiu.mri
+	$(AR_ALONE) -M < $(ROOT_PATH)/script.mri
 else ifeq ($(platform), libnx)
-$(TARGET): libnx-ln $(OBJS) libdeps.a
+$(TARGET): libnx-ln $(OBJS) libdeps.a libdetect.a
 	$(MKDIR) libtemp
 	cp $+ libtemp/
-	$(AR) -M < libnx.mri
+	$(AR) -M < $(ROOT_PATH)/script.mri
 else ifeq ($(platform), ctr)
-$(TARGET): $(OBJS) libdeps.a
+$(TARGET): $(OBJS) libdeps.a libdetect.a
 	$(MKDIR) libtemp
 	cp $+ libtemp/
-	$(AR) -M < ctr.mri
+	$(AR) -M < $(ROOT_PATH)/script.mri
 else ifeq ($(STATIC_LINKING), 1)
-$(TARGET): $(DETECT_OBJS) $(OBJS) libdeps.a
+$(TARGET): $(DETECT_OBJS) $(OBJS) libdeps.a libdetect.a
 	@echo Linking $@...
 	$(HIDE)$(AR) $@ $(wildcard *.o) $(wildcard */*.o) $(wildcard */*/*.o) $(wildcard */*/*/*.o) $(wildcard */*/*/*/*.o)  $(wildcard */*/*/*/*/*.o)
 else
@@ -628,6 +628,8 @@ endif
 	$(HIDE)$(RM) scummvm.zip
 	$(HIDE)$(RM) $(TARGET_NAME)_libretro.info
 	$(HIDE)$(RM) $(TARGET)
+	$(HIDE)$(RM) script.mri
+	$(HIDE)$(RM) config.mk.engines.lite
 
 # Include the dependency tracking files.
 -include $(wildcard $(addsuffix /*.d,$(DEPDIRS)))

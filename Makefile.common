@@ -33,6 +33,8 @@ NO_HIGH_DEF    ?= 0
 NO_WIP         ?= 1
 USE_LIBCO      ?= 1
 ENABLE_VKEYBD   = 1
+STATIC_LINKING ?= 0
+LITE           ?= 0
 
 # Paths
 SCUMMVM_PATH         := $(ROOT_PATH)/scummvm
@@ -82,14 +84,16 @@ endif
 INCLUDES     += -I$(CORE_PATH)
 MODULE_PATHS += $(CORE_PATH)
 
-OBJS := $(CORE_PATH)/libretro_os.o \
+LIBRETRO_OBJS := $(CORE_PATH)/libretro_os.o \
 	$(CORE_PATH)/libretro-fs.o \
 	$(CORE_PATH)/libretro-fs-factory.o \
 	$(CORE_PATH)/libretro.o
 
 ifneq ($(USE_LIBCO), 1)
-OBJS += $(CORE_PATH)/retro_emu_thread.o
+LIBRETRO_OBJS += $(CORE_PATH)/retro_emu_thread.o
 endif
+
+OBJS += $(LIBRETRO_OBJS)
 
 ######################################################################
 # External dependencies settings
@@ -492,16 +496,25 @@ endif
 # Module settings
 ######################################################################
 
-MODULES := test devtools base $(MODULES)
+PRE_MODULES := base
+MODULES := test devtools $(PRE_MODULES) $(MODULES)
 INCLUDES    += -I$(SCUMMVM_PATH)/engines -I$(SCUMMVM_PATH)/backends/vkeybd
 
-# Following script automatically generates configuration engines files (build/config.mk.engines, engines/engines.mk, engines/plugins_table.h, engines/detection_table.h) from actual source in $(SCUMMVM_PATH).
-#
-# config.mk.engines.lite is a static file with a reduced set of engines for minimal builds
+# script.mri head
+ifeq ($(STATIC_LINKING),1)
+   $(shell printf "CREATE $(TARGET)\n" > $(ROOT_PATH)/script.mri)
+endif
+
+# Engine modules
+# Following script
+# - generates configuration engines files (build/config.mk.engines, engines/engines.mk, engines/plugins_table.h, engines/detection_table.h) from actual source in $(SCUMMVM_PATH).
+# or (if static linking is required)
+# - generates config.mk.engines.lite - static file with a reduced set of engines for minimal builds - from lite_engines.list
+# - generates script.mri engines part
 
 ifeq (,$(filter clean,$(MAKECMDGOALS)))
 $(info Configuring ScummVM engines...)
-ifneq ($(shell cd $(ROOT_PATH); ./configure_engines.sh $(NO_HIGH_DEF) $(NO_WIP)),0)
+ifneq ($(shell cd $(ROOT_PATH); ./configure_engines.sh $(NO_HIGH_DEF) $(NO_WIP) $(STATIC_LINKING) $(LITE)),0)
    $(error Configuring ScummVM engines failed)
 endif
 endif
@@ -514,8 +527,8 @@ endif
 
 include $(SCUMMVM_PATH)/engines/engines.mk
 
-# After the game specific modules follow the shared modules
-MODULES += \
+# Shared modules
+POST_MODULES += \
 	engines \
 	gui \
 	backends \
@@ -524,13 +537,27 @@ MODULES += \
 	graphics \
 	audio \
 	math \
-	common \
+	common
+
+ifeq ($(HAVE_MT32EMU),1)
+   POST_MODULES += audio/softsynth/mt32
+   DEFINES += -DUSE_MT32EMU
+endif
+
+MODULES += $(POST_MODULES) \
 	po \
 	doc
 
-ifeq ($(HAVE_MT32EMU),1)
-   MODULES += audio/softsynth/mt32
-   DEFINES += -DUSE_MT32EMU
+
+# script.mri tail
+ifeq ($(STATIC_LINKING),1)
+   $(shell printf "$(addprefix ADDLIB libtemp/lib, $(addsuffix .a\n,$(notdir $(PRE_MODULES) $(POST_MODULES))))" >> $(ROOT_PATH)/script.mri)
+   $(shell printf "ADDLIB libtemp/libdeps.a\n" >> $(ROOT_PATH)/script.mri)
+   $(shell printf "ADDLIB libtemp/libdetect.a\n" >> $(ROOT_PATH)/script.mri)
+   $(shell printf "$(addprefix ADDMOD libtemp/, $(addsuffix \n,$(notdir $(LIBRETRO_OBJS))))" >> $(ROOT_PATH)/script.mri)
+   $(shell printf "SAVE\n" >> $(ROOT_PATH)/script.mri)
+   $(shell printf "END\n" >> $(ROOT_PATH)/script.mri)
+   $(shell sed -i.bak -e "s/^ //g" $(ROOT_PATH)/script.mri;rm -f $(ROOT_PATH)/script.mri.bak)
 endif
 
 ######################################################################
