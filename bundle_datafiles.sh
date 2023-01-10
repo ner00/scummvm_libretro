@@ -34,7 +34,7 @@ function process_group(){
 	for item in "${arr[@]}"; do
 		[ $target = "bundle" ] && cp $item "${TMP_PATH}/${dirname}/"
 		fragment=$(get_firmware_entry $count $(echo "$item" | sed "s|^.*/||g") "$dirname")
-		CORE_INFO_DATS="$CORE_INFO_DATS $fragment"
+		CORE_INFO_DATS="${CORE_INFO_DATS}${fragment}"
 		count=$(expr $count + 1)
 	done
 }
@@ -126,11 +126,10 @@ is_experimental = "false"
 
 # Firmware / BIOS
 firmware_count = $count
-
 EOF
 	set -e
 
-	CORE_INFO_CONTENT="$CORE_INFO_CONTENT $CORE_INFO_DATS"
+	CORE_INFO_CONTENT="${CORE_INFO_CONTENT}${CORE_INFO_DATS}"
 	echo "$CORE_INFO_CONTENT" > "${TARGET_PATH}/${2}_libretro.info"
 	echo "${2}_libretro.info created successfully"
 else
