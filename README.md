@@ -1,16 +1,15 @@
-# ScummVM mainline libretro core
+# ScummVM libretro core
 
 Libretro core built directly from untouched mainline ScummVM source.
 
-## Purpose
-As current official ScummVM libretro core is based on a very old fork of ScummVM, this repository aims to have a libretro core always in sync with ScummVM mainline repository, with a maintenance effort from low to none.
-* ScummVM main repo is included as a submodule. To sync the libretro core it should be sufficient to update the submodule and build
-* No patch is applied to the submodule
-* Submodule updates are generally committed following ScummVM official releases (though it can be updated to any commit upstream, considering that adjustment to core makefiles and sources in `src` may be required to build). First three fields of core tags are relevant to upstream ScummVM version, last is libretro core revision (e.g. v2.6.1.1 is ScummVM 2.6.1, core revision 1).
-* Datafiles and themes bundle (`scummvm.zip`) and `core.info` files are built automatically based on current submodule source
+ScummVM main repo is included as a submodule. To sync the libretro core it should be sufficient to update the submodule and build.
+
+Submodule updates are generally committed following ScummVM official releases (though it can be updated to any commit upstream, considering that adjustment to core makefiles and sources in `src` may be required to build). First three fields of core tags are relevant to upstream ScummVM version, last is libretro core revision (e.g. v2.6.1.1 is ScummVM 2.6.1, core revision 1).
+
+Datafiles and themes bundle (`scummvm.zip`) and `core.info` files are built automatically based on current submodule source.
 
 ## Build
-To build with the default configuration the core only type in a shell the following:
+To build the core with the default configuration, type in a shell the following:
 ```
 git clone --recursive https://github.com/libretro/scummvm
 cd scummvm
@@ -19,6 +18,8 @@ make
 Use `make all` to build the core along with datafiles (`scummvm.zip`) and core info file (which can be built separately with `make datafiles`/`make infofile`).
 
 "Work in progress" engines are not built by default, to include them pass `NO_WIP=0` to make.
+
+To crossbuild for specific platforms, pass the relevant `platform` variable to make (refer to Makefile for supported omes).
 
 ### Build for Android
 To build for Android:
