@@ -203,7 +203,8 @@ else ifeq ($(platform), gcw0)
    DEFINES += -DDINGUX -fomit-frame-pointer -ffast-math -march=mips32 -mtune=mips32r2 -mhard-float -fPIC
    DEFINES += -ffunction-sections -fdata-sections
    LDFLAGS += -shared -Wl,--gc-sections -Wl,--version-script=$(ROOT_PATH)/link.T -fPIC
-   CXXFLAGS += -std=c++11 -DPNG_RESTRICT=__restrict__
+   CFLAGS += -std=c99
+   CXXFLAGS += -std=c++11
    USE_VORBIS = 0
    USE_THEORADEC = 0
    USE_TREMOR = 1
