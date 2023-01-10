@@ -512,7 +512,7 @@ endif
 # - generates config.mk.engines.lite - static file with a reduced set of engines for minimal builds - from lite_engines.list
 # - generates script.mri engines part
 
-ifeq (,$(filter clean,$(MAKECMDGOALS)))
+ifeq (,$(filter clean datafiles coreinfo,$(MAKECMDGOALS)))
 $(info Configuring ScummVM engines...)
 ifneq ($(shell cd $(ROOT_PATH); ./configure_engines.sh $(NO_HIGH_DEF) $(NO_WIP) $(STATIC_LINKING) $(LITE)),0)
    $(error Configuring ScummVM engines failed)
