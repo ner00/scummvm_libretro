@@ -530,7 +530,7 @@ endif
 include $(SCUMMVM_PATH)/engines/engines.mk
 
 # Shared modules
-SHARED_MODULES := base \
+SHARED_MODULES := \
 	engines \
 	gui \
 	backends \
