@@ -43,7 +43,7 @@ function process_group(){
 # $1 [REQ] target build ("bundle" to build scummvm.zip, any other string to build core info file)
 # $2 [OPT] target name (prefix for core info file)
 # $3 [OPT] displayed core name (shown in frontend)
-# $4 [OPT] allowed extensions - UNUSED, ref. $SUPPORTED_EXTENSIONS
+# $4 [OPT] allowed extensions - backup if ScummVM.dat is not available
 
 # Set variables
 BUILD_PATH=$(pwd)
@@ -55,9 +55,6 @@ BUNDLE_DATAFILES_DIR="${BUNDLE_DIR}/extra"
 BUNDLE_THEME_DIR="${BUNDLE_DIR}/theme"
 BUNDLE_ZIP_FILE="${BUNDLE_DIR}.zip"
 BUNDLE_LOCAL_DATAFILES_DIR="${BUILD_PATH}/dist"
-# Updated manually
-# TODO: evaluate extraction of libretro database file and supported extensions from scummvm detection tables. New makefile rule could be added for database file in case.
-SUPPORTED_EXTENSIONS="0|1|2|3|4|5|6|8|25|99|101|102|455|512|scummvm|scumm|gam|z5|dat|blb|z6|ROM|001|taf|zblorb|dcp|(a)|cup|HE0|(A)|D\$\$|STK|z8|hex|ITK|CD1|pic|Z5|z3|blorb|ulx|DAT|cas|CGA|PIC|acd|SYS|OVL|alr|t3|gblorb|tab|AP|CRC|EXE|z4|W32|MAC|mac|WIN|003|000|exe|asl|slg|AVD|INI|SND|cat|ANG|CUP|SYS16|img|LB|TLK|MIX|RLB|#02|FNT|win|HE1|DMU|FON|SCR|MAP|TEX|HEP|DIR|DRV|a3c|GRV|CUR|CC|COD|OPT|LA0|gfx|GDA|ASK|LNG|ini|W16|SPP|bin|BND|BUN|TRS|add|HRS|DFW|BIN|STR|DR1|ALD|004|002|005|006|R02|R00|C00|D00|GAM|SCN|IDX|ogg|TXT|VB|GRA|BAT|BMV|H\$\$|MSG|VGA|PKD|SAV|CPS|PAK|SHP|PAT|dxr|gmp|SNG|C35|C06|WAV|wav|CAB|game|CG1|(b)|he2|he1|HE2|SYN|nl|PRC|V56|SEQ|P56|FKR|EX1|rom|CRF|LIC|\$00|ALL|txt|acx|nbf|VXD|lab|LAB|ACX|mpc|msd|ADF|nib|HELLO|dsk|xfd|woz|d\$\$|SET|SOL|Pat|CFG|BSF|RES|CLT|LFL|SQU|RSC|SOUND|rsc|2 US|sub|cel|OVR|007|pat|MDT|CHK|EMC|ADV|voc|FDT|VQA|info|HPF|HQR|CSC|HEB|MID|LEC|QA|009|VMD|EGA|MHK|d64|prg|lfl|LZC|NL|DXR|flac|IMS|m4b|M4B|MOR|doc|jpg|HAG|AGA|BLB|PAL|PRG|CLG|CNF|ORB|BRO|bro|avi|str|PH1|DEF|sym|OUT|IN|TOC|AUD|j2|Text|CEL|AVI|1C|1c|L9|HRC|mhk|LIB|RED|PMV|SM0|SM1|RRM|CAT|CNV|GME|VOC|OGG|GERMAN|SHR|FRENCH|DNR|DSK|dnr|MMM|z4f|025|he0|V16|vga|TAB|CLU|b25c|INF|RL|mp3|SOU|SOG|HEX|mma|st|sdb|cab|MPC|MS0|IMG|ENC|C|GRP|PAR|PGM|Z|RL2|OBJ|ZFS|zfs|zip|z2|z1"
 
 # Retrieve data file info from ScummVM source
 THEMES_LIST=$(cat "${SRC_PATH}/dists/scummvm.rc" 2>/dev/null | grep FILE.*gui/themes.*\* | sed "s|.*\"\(.*\)\"|${SRC_PATH}/\1|g")
@@ -92,6 +89,11 @@ if [ -d "$BUNDLE_LOCAL_DATAFILES_DIR" -a ! -z "$(ls -A ${BUNDLE_LOCAL_DATAFILES_
 fi
 
 if [ ! $1 = "bundle" ]; then
+
+# Updated manually
+wget -NO "$BUILD_PATH"/ScummVM.dat https://raw.githubusercontent.com/libretro/libretro-database/master/dat/ScummVM.dat
+[ -f "$BUILD_PATH"/ScummVM.dat ] && SUPPORTED_EXTENSIONS="$(cat $BUILD_PATH/ScummVM.dat | grep 'rom (' | sed 's/\" .*//g;s/.*\.//g' | sort -u | tr '\n' '|')" || SUPPORTED_EXTENSIONS="$4"
+
 	# Create core.info file
 	set +e
 	read -d '' CORE_INFO_CONTENT <<EOF
