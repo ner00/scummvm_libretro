@@ -608,30 +608,10 @@ libdetect.a: $(DETECT_OBJS)
 clean:
 	@echo Cleaning project...
 	$(HIDE)$(RM_REC) $(DEPDIRS)
-	$(HIDE)$(RM) $(OBJS) $(DETECT_OBJS) $(OBJS_DEPS) libdeps.a $(TARGET)
-ifeq ($(platform), wiiu)
-	$(HIDE)$(RM_REC) libtemp
-endif
-ifeq ($(platform), libnx)
-	$(HIDE)$(RM_REC) libtemp
+	$(HIDE)$(RM) $(OBJS) $(DETECT_OBJS) $(OBJS_DEPS) libdeps.a libdetect.a $(TARGET) *.a
+	$(HIDE)$(RM_REC) libtemp $(MODULES)
 	$(HIDE)$(RM) libnx-ln
-endif
-	$(HIDE)$(RM_REC) audio
-	$(HIDE)$(RM_REC) backends
-	$(HIDE)$(RM_REC) base
-	$(HIDE)$(RM_REC) common
-	$(HIDE)$(RM_REC) engines
-	$(HIDE)$(RM_REC) graphics
-	$(HIDE)$(RM_REC) gui
-	$(HIDE)$(RM_REC) image
-	$(HIDE)$(RM_REC) video
-	$(HIDE)$(RM_REC) math
-
-	$(HIDE)$(RM) scummvm.zip
-	$(HIDE)$(RM) $(TARGET_NAME)_libretro.info
-	$(HIDE)$(RM) $(TARGET)
-	$(HIDE)$(RM) script.mri
-	$(HIDE)$(RM) config.mk.engines.lite
+	$(HIDE)$(RM) scummvm.zip  $(TARGET_NAME)_libretro.info script.mri config.mk.engines.lite ScummVM.dat
 
 # Include the dependency tracking files.
 -include $(wildcard $(addsuffix /*.d,$(DEPDIRS)))
