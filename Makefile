@@ -422,12 +422,10 @@ else
       override platform = win
    endif
 
-   ifeq ($(BUILD_64BIT),)
-      ifeq (,$(findstring 64,$(shell uname -m)))
-         BUILD_64BIT := 0
-      else
-         BUILD_64BIT := 1
-      endif
+   ifeq (,$(findstring 64,$(shell uname -m)))
+      BUILD_64BIT := 0
+   else
+      BUILD_64BIT := 1
    endif
    TARGET_64BIT := $(BUILD_64BIT)
 endif
