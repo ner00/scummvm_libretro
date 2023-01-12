@@ -4,8 +4,18 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#if defined(WIIU) || defined(__CELLOS_LV2__) || defined(GEKKO)
+
+#undef  SCUMM_LITTLE_ENDIAN
+#define SCUMM_BIG_ENDIAN
+#define SCUMM_NEED_ALIGNMENT
+
+#else
+
 #define SCUMM_LITTLE_ENDIAN
 #define SCUMM_NEED_ALIGNMENT
+
+#endif
 
 /* Data types */
 #ifndef SCUMMVM_DONT_DEFINE_TYPES
@@ -20,6 +30,13 @@ typedef unsigned int uint;
 typedef signed long long int64;
 typedef unsigned long long uint64;
 #endif
+
+#if defined(WIIU)
+
+#include <wiiu/types.h>
+
+#endif
+
 
 #if defined(__x86_64__) || defined(_M_X64) || defined(__ppc64__) || defined(__powerpc64__) || defined(__LP64__) || defined(_M_ARM64)
 
