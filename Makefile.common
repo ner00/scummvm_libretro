@@ -81,7 +81,7 @@ endif
 # Libretro settings
 ######################################################################
 
-INCLUDES     += -I$(CORE_PATH)
+INCLUDES     += -I$(ROOT_PATH)/include
 MODULE_PATHS += $(CORE_PATH)
 
 LIBRETRO_OBJS := $(CORE_PATH)/libretro_os.o \
