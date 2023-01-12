@@ -157,7 +157,7 @@ else ifeq ($(platform), wiiu)
    AR_ALONE = $(DEVKITPPC)/bin/powerpc-eabi-ar$(EXE_EXT)
    DEFINES += -DGEKKO -mwup -mcpu=750 -meabi -mhard-float -D__POWERPC__ -D__ppc__ -DWORDS_BIGENDIAN=1 -DMSB_FIRST
    DEFINES += -U__INT32_TYPE__ -U __UINT32_TYPE__ -D__INT32_TYPE__=int -fpermissive
-   DEFINES += -DHAVE_STRTOUL -DWIIU -I$(LIBRETRO_COMM_PATH)/include
+   DEFINES += -DHAVE_STRTOUL -DWIIU -DSCUMM_BIG_ENDIAN -I$(LIBRETRO_COMM_PATH)/include
    LITE := 1
    CP := cp
    STATIC_LINKING = 1
