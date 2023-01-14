@@ -31,13 +31,6 @@ typedef signed long long int64;
 typedef unsigned long long uint64;
 #endif
 
-#if defined(WIIU)
-
-#include <wiiu/types.h>
-
-#endif
-
-
 #if defined(__x86_64__) || defined(_M_X64) || defined(__ppc64__) || defined(__powerpc64__) || defined(__LP64__) || defined(_M_ARM64)
 
 typedef uint64 uintptr;
