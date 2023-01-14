@@ -5,17 +5,13 @@
 #define CONFIG_H
 
 #if defined(WIIU) || defined(__CELLOS_LV2__) || defined(GEKKO)
-
 #undef  SCUMM_LITTLE_ENDIAN
 #define SCUMM_BIG_ENDIAN
-#define SCUMM_NEED_ALIGNMENT
-
 #else
-
 #define SCUMM_LITTLE_ENDIAN
-#define SCUMM_NEED_ALIGNMENT
-
 #endif
+
+#define SCUMM_NEED_ALIGNMENT
 
 /* Data types */
 #ifndef SCUMMVM_DONT_DEFINE_TYPES
