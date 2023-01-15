@@ -522,12 +522,12 @@ endif
 endif
 
 ifeq ($(LITE), 1)
-   include $(ROOT_PATH)/config.mk.engines.lite
+   -include $(ROOT_PATH)/config.mk.engines.lite
 else
-   include $(SCUMMVM_PATH)/config.mk.engines
+   -include $(SCUMMVM_PATH)/config.mk.engines
 endif
 
-include $(SCUMMVM_PATH)/engines/engines.mk
+-include $(SCUMMVM_PATH)/engines/engines.mk
 
 # Shared modules
 SHARED_MODULES := \
