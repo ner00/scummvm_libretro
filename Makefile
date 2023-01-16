@@ -209,6 +209,7 @@ else ifeq ($(platform), gcw0)
    USE_THEORADEC = 0
    USE_TREMOR = 1
    USE_LIBCO  = 0
+   USE_CURL = 0
    HAVE_MT32EMU = 0
    NO_HIGH_DEF := 1
 
@@ -227,6 +228,7 @@ else ifeq ($(platform), miyoo)
    USE_THEORADEC = 0
    USE_TREMOR = 1
    USE_LIBCO  = 0
+   USE_CURL = 0
    HAVE_MT32EMU = 0
    NO_HIGH_DEF := 1
 
@@ -296,6 +298,7 @@ else ifneq (,$(findstring oga_a35_neon_hardfloat,$(platform)))
 else ifeq ($(platform), emscripten)
    TARGET := $(TARGET_NAME)_libretro_$(platform).bc
    STATIC_LINKING = 1
+   USE_CLOUD = 0
 
 # Windows MSVC 2017 all architectures
 else ifneq (,$(findstring windows_msvc2017,$(platform)))

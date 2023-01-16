@@ -1,0 +1,406 @@
+# Functions
+is_lib_available = $(if $(shell printf "\#include $(2)\nint main(){return 0;}" | $(CC) -xc -Wall -O -o /dev/null -l$(1) - > /dev/null 2>&1 && echo $$?),yes,no)
+
+
+INCLUDES  += -I$(DEPS_PATH)
+
+INCLUDES  += -I$(LIBRETRO_COMM_PATH)/include -I$(LIBRETRO_COMM_PATH)/include/compat
+OBJS_DEPS += $(LIBRETRO_COMM_PATH)/file/file_path_io.o \
+	$(LIBRETRO_COMM_PATH)/file/file_path.o \
+	$(LIBRETRO_COMM_PATH)/file/retro_dirent.o \
+	$(LIBRETRO_COMM_PATH)/vfs/vfs_implementation.o \
+	$(LIBRETRO_COMM_PATH)/string/stdstring.o \
+	$(LIBRETRO_COMM_PATH)/time/rtime.o
+
+
+ifeq ($(USE_LIBCO), 1)
+OBJS_DEPS += $(LIBRETRO_COMM_PATH)/libco/libco.o
+ifeq ($(platform), genode)
+OBJS_DEPS += $(LIBRETRO_COMM_PATH)/libco/genode.o
+endif
+endif
+
+ifneq ($(STATIC_LINKING), 1)
+OBJS_DEPS += $(LIBRETRO_COMM_PATH)/encodings/encoding_utf.o \
+	$(LIBRETRO_COMM_PATH)/compat/fopen_utf8.o \
+	$(LIBRETRO_COMM_PATH)/compat/compat_strl.o
+endif
+
+ifeq ($(USE_FLUIDSYNTH), 1)
+DEFINES += -DUSE_FLUIDSYNTH -DUSE_FLUIDLITE
+INCLUDES += -I$(DEPS_PATH)/fluidsynth/include \
+	-I$(DEPS_PATH)/fluidsynth/src \
+	-I$(DEPS_PATH)/libvorbis/include \
+	-I$(DEPS_PATH)/libogg/include
+OBJS_DEPS += $(DEPS_PATH)/fluidsynth/src/fluid_chan.o \
+	$(DEPS_PATH)/fluidsynth/src/fluid_chorus.o \
+	$(DEPS_PATH)/fluidsynth/src/fluid_conv.o \
+	$(DEPS_PATH)/fluidsynth/src/fluid_defsfont.o \
+	$(DEPS_PATH)/fluidsynth/src/fluid_dsp_float.o \
+	$(DEPS_PATH)/fluidsynth/src/fluid_gen.o \
+	$(DEPS_PATH)/fluidsynth/src/fluid_hash.o \
+	$(DEPS_PATH)/fluidsynth/src/fluid_list.o \
+	$(DEPS_PATH)/fluidsynth/src/fluid_mod.o \
+	$(DEPS_PATH)/fluidsynth/src/fluid_ramsfont.o \
+	$(DEPS_PATH)/fluidsynth/src/fluid_rev.o \
+	$(DEPS_PATH)/fluidsynth/src/fluid_settings.o \
+	$(DEPS_PATH)/fluidsynth/src/fluid_synth.o \
+	$(DEPS_PATH)/fluidsynth/src/fluid_sys.o \
+	$(DEPS_PATH)/fluidsynth/src/fluid_tuning.o \
+	$(DEPS_PATH)/fluidsynth/src/fluid_voice.o
+endif
+
+ifeq ($(USE_FLAC), 1)
+DEFINES += -DUSE_FLAC
+INCLUDES += -I$(DEPS_PATH)/libFLAC/include
+OBJS_DEPS += $(DEPS_PATH)/libFLAC/bitreader.o \
+	$(DEPS_PATH)/libFLAC/cpu.o \
+	$(DEPS_PATH)/libFLAC/crc.o \
+	$(DEPS_PATH)/libFLAC/fixed.o \
+	$(DEPS_PATH)/libFLAC/format.o \
+	$(DEPS_PATH)/libFLAC/lpc.o \
+	$(DEPS_PATH)/libFLAC/md5.o \
+	$(DEPS_PATH)/libFLAC/memory.o \
+	$(DEPS_PATH)/libFLAC/metadata_object.o \
+	$(DEPS_PATH)/libFLAC/stream_decoder.o
+
+ifeq ($(platform), win)
+OBJS_DEPS += $(DEPS_PATH)/libFLAC/share/win_utf8_io/win_utf8_io.o \
+	 $(SCUMMVM_PATH)/backends/platform/sdl/win32/win32_wrapper.o
+endif
+endif
+
+ifeq ($(USE_VORBIS), 1)
+DEFINES += -DUSE_VORBIS
+INCLUDES += -I$(DEPS_PATH)/libogg/include \
+	-I$(DEPS_PATH)/libvorbis/include \
+	-I$(DEPS_PATH)/libvorbis/lib
+OBJS_DEPS += $(DEPS_PATH)/libogg/src/bitwise.o \
+	$(DEPS_PATH)/libogg/src/framing.o \
+	$(DEPS_PATH)/libvorbis/lib/analysis.o \
+	$(DEPS_PATH)/libvorbis/lib/bitrate.o \
+	$(DEPS_PATH)/libvorbis/lib/block.o \
+	$(DEPS_PATH)/libvorbis/lib/codebook.o \
+	$(DEPS_PATH)/libvorbis/lib/envelope.o \
+	$(DEPS_PATH)/libvorbis/lib/floor0.o \
+	$(DEPS_PATH)/libvorbis/lib/floor1.o \
+	$(DEPS_PATH)/libvorbis/lib/info.o \
+	$(DEPS_PATH)/libvorbis/lib/lookup.o \
+	$(DEPS_PATH)/libvorbis/lib/lpc.o \
+	$(DEPS_PATH)/libvorbis/lib/lsp.o \
+	$(DEPS_PATH)/libvorbis/lib/mapping0.o \
+	$(DEPS_PATH)/libvorbis/lib/mdct.o \
+	$(DEPS_PATH)/libvorbis/lib/psy.o \
+	$(DEPS_PATH)/libvorbis/lib/registry.o \
+	$(DEPS_PATH)/libvorbis/lib/res0.o \
+	$(DEPS_PATH)/libvorbis/lib/sharedbook.o \
+	$(DEPS_PATH)/libvorbis/lib/smallft.o \
+	$(DEPS_PATH)/libvorbis/lib/synthesis.o \
+	$(DEPS_PATH)/libvorbis/lib/vorbisenc.o \
+	$(DEPS_PATH)/libvorbis/lib/vorbisfile.o \
+	$(DEPS_PATH)/libvorbis/lib/window.o
+endif
+
+ifeq ($(USE_TREMOR), 1)
+DEFINES += -DUSE_TREMOR -DUSE_VORBIS
+OBJS_DEPS += $(DEPS_PATH)/tremor/bitwise.o \
+	$(DEPS_PATH)/tremor/block.o \
+	$(DEPS_PATH)/tremor/codebook.o \
+	$(DEPS_PATH)/tremor/floor0.o \
+	$(DEPS_PATH)/tremor/floor1.o \
+	$(DEPS_PATH)/tremor/framing.o \
+	$(DEPS_PATH)/tremor/info.o \
+	$(DEPS_PATH)/tremor/mapping0.o \
+	$(DEPS_PATH)/tremor/mdct.o \
+	$(DEPS_PATH)/tremor/registry.o \
+	$(DEPS_PATH)/tremor/res012.o \
+	$(DEPS_PATH)/tremor/sharedbook.o \
+	$(DEPS_PATH)/tremor/synthesis.o \
+	$(DEPS_PATH)/tremor/vorbisfile.o \
+	$(DEPS_PATH)/tremor/window.o
+endif
+
+ifeq ($(USE_ZLIB), 1)
+DEFINES += -DUSE_ZLIB  -DWANT_ZLIB
+OBJS_DEPS += $(DEPS_PATH)/libz/deflate.o \
+	$(DEPS_PATH)/libz/gzlib.o \
+	$(DEPS_PATH)/libz/uncompr.o \
+	$(DEPS_PATH)/libz/zutil.o \
+	$(DEPS_PATH)/libz/inffast.o \
+	$(DEPS_PATH)/libz/gzread.o \
+	$(DEPS_PATH)/libz/crc32.o \
+	$(DEPS_PATH)/libz/gzwrite.o \
+	$(DEPS_PATH)/libz/inflate.o \
+	$(DEPS_PATH)/libz/infback.o \
+	$(DEPS_PATH)/libz/inftrees.o \
+	$(DEPS_PATH)/libz/trees.o \
+	$(DEPS_PATH)/libz/gzclose.o \
+	$(DEPS_PATH)/libz/compress.o \
+	$(DEPS_PATH)/libz/adler32.o
+endif
+
+ifeq ($(USE_MAD), 1)
+DEFINES += -DUSE_MAD -DFPM_DEFAULT
+INCLUDES += -I$(DEPS_PATH)/libmad
+OBJS_DEPS += $(DEPS_PATH)/libmad/bit.o \
+	$(DEPS_PATH)/libmad/decoder.o \
+	$(DEPS_PATH)/libmad/frame.o \
+	$(DEPS_PATH)/libmad/huffman.o \
+	$(DEPS_PATH)/libmad/layer12.o \
+	$(DEPS_PATH)/libmad/layer3.o \
+	$(DEPS_PATH)/libmad/stream.o \
+	$(DEPS_PATH)/libmad/synth.o \
+	$(DEPS_PATH)/libmad/timer.o
+endif
+
+ifeq ($(USE_FAAD), 1)
+DEFINES += -DUSE_FAAD
+INCLUDES += -I$(DEPS_PATH)/libfaad/include -I$(DEPS_PATH)/libfaad/libfaad
+OBJS_DEPS += $(DEPS_PATH)/libfaad/libfaad/bits.o \
+	$(DEPS_PATH)/libfaad/libfaad/cfft.o \
+	$(DEPS_PATH)/libfaad/libfaad/common.o \
+	$(DEPS_PATH)/libfaad/libfaad/decoder.o \
+	$(DEPS_PATH)/libfaad/libfaad/drc.o \
+	$(DEPS_PATH)/libfaad/libfaad/error.o \
+	$(DEPS_PATH)/libfaad/libfaad/filtbank.o \
+	$(DEPS_PATH)/libfaad/libfaad/hcr.o \
+	$(DEPS_PATH)/libfaad/libfaad/huffman.o \
+	$(DEPS_PATH)/libfaad/libfaad/ic_predict.o \
+	$(DEPS_PATH)/libfaad/libfaad/is.o \
+	$(DEPS_PATH)/libfaad/libfaad/lt_predict.o \
+	$(DEPS_PATH)/libfaad/libfaad/mdct.o \
+	$(DEPS_PATH)/libfaad/libfaad/mp4.o \
+	$(DEPS_PATH)/libfaad/libfaad/ms.o \
+	$(DEPS_PATH)/libfaad/libfaad/output.o \
+	$(DEPS_PATH)/libfaad/libfaad/pns.o \
+	$(DEPS_PATH)/libfaad/libfaad/pulse.o \
+	$(DEPS_PATH)/libfaad/libfaad/ps_dec.o \
+	$(DEPS_PATH)/libfaad/libfaad/ps_syntax.o \
+	$(DEPS_PATH)/libfaad/libfaad/rvlc.o \
+	$(DEPS_PATH)/libfaad/libfaad/sbr_dct.o \
+	$(DEPS_PATH)/libfaad/libfaad/sbr_dec.o \
+	$(DEPS_PATH)/libfaad/libfaad/sbr_e_nf.o \
+	$(DEPS_PATH)/libfaad/libfaad/sbr_fbt.o \
+	$(DEPS_PATH)/libfaad/libfaad/sbr_hfadj.o \
+	$(DEPS_PATH)/libfaad/libfaad/sbr_hfgen.o \
+	$(DEPS_PATH)/libfaad/libfaad/sbr_huff.o \
+	$(DEPS_PATH)/libfaad/libfaad/sbr_qmf.o \
+	$(DEPS_PATH)/libfaad/libfaad/sbr_syntax.o \
+	$(DEPS_PATH)/libfaad/libfaad/sbr_tf_grid.o \
+	$(DEPS_PATH)/libfaad/libfaad/specrec.o \
+	$(DEPS_PATH)/libfaad/libfaad/syntax.o \
+	$(DEPS_PATH)/libfaad/libfaad/tns.o
+endif
+
+ifeq ($(USE_PNG), 1)
+DEFINES += -DUSE_PNG
+INCLUDES += -I$(DEPS_PATH)/libpng
+OBJS_DEPS += $(DEPS_PATH)/libpng/png.o \
+	$(DEPS_PATH)/libpng/pngerror.o \
+	$(DEPS_PATH)/libpng/pngget.o \
+	$(DEPS_PATH)/libpng/pngmem.o \
+	$(DEPS_PATH)/libpng/pngpread.o \
+	$(DEPS_PATH)/libpng/pngread.o \
+	$(DEPS_PATH)/libpng/pngrio.o \
+	$(DEPS_PATH)/libpng/pngrtran.o \
+	$(DEPS_PATH)/libpng/pngrutil.o \
+	$(DEPS_PATH)/libpng/pngset.o \
+	$(DEPS_PATH)/libpng/pngtrans.o \
+	$(DEPS_PATH)/libpng/pngwrite.o \
+	$(DEPS_PATH)/libpng/pngwutil.o \
+	$(DEPS_PATH)/libpng/pngwtran.o \
+	$(DEPS_PATH)/libpng/pngwio.o
+endif
+
+ifeq ($(USE_JPEG), 1)
+DEFINES += -DUSE_JPEG -DJDCT_DEFAULT=JDCT_IFAST
+INCLUDES += -I$(DEPS_PATH)/libjpeg
+OBJS_DEPS += $(DEPS_PATH)/libjpeg/jaricom.o \
+	$(DEPS_PATH)/libjpeg/jcapimin.o \
+	$(DEPS_PATH)/libjpeg/jcapistd.o \
+	$(DEPS_PATH)/libjpeg/jcarith.o \
+	$(DEPS_PATH)/libjpeg/jccoefct.o \
+	$(DEPS_PATH)/libjpeg/jccolor.o \
+	$(DEPS_PATH)/libjpeg/jcdctmgr.o \
+	$(DEPS_PATH)/libjpeg/jcinit.o \
+	$(DEPS_PATH)/libjpeg/jchuff.o \
+	$(DEPS_PATH)/libjpeg/jcmarker.o \
+	$(DEPS_PATH)/libjpeg/jcmainct.o \
+	$(DEPS_PATH)/libjpeg/jcmaster.o \
+	$(DEPS_PATH)/libjpeg/jcomapi.o \
+	$(DEPS_PATH)/libjpeg/jcphuff.o \
+	$(DEPS_PATH)/libjpeg/jcprepct.o \
+	$(DEPS_PATH)/libjpeg/jcsample.o \
+	$(DEPS_PATH)/libjpeg/jdapimin.o \
+	$(DEPS_PATH)/libjpeg/jdapistd.o \
+	$(DEPS_PATH)/libjpeg/jdarith.o \
+	$(DEPS_PATH)/libjpeg/jdcoefct.o \
+	$(DEPS_PATH)/libjpeg/jdcolor.o \
+	$(DEPS_PATH)/libjpeg/jddctmgr.o \
+	$(DEPS_PATH)/libjpeg/jdhuff.o \
+	$(DEPS_PATH)/libjpeg/jdinput.o \
+	$(DEPS_PATH)/libjpeg/jdmarker.o \
+	$(DEPS_PATH)/libjpeg/jdmainct.o \
+	$(DEPS_PATH)/libjpeg/jdmaster.o \
+	$(DEPS_PATH)/libjpeg/jdmerge.o \
+	$(DEPS_PATH)/libjpeg/jdphuff.o \
+	$(DEPS_PATH)/libjpeg/jdpostct.o \
+	$(DEPS_PATH)/libjpeg/jdsample.o \
+	$(DEPS_PATH)/libjpeg/jdtrans.o \
+	$(DEPS_PATH)/libjpeg/jerror.o \
+	$(DEPS_PATH)/libjpeg/jidctflt.o \
+	$(DEPS_PATH)/libjpeg/jidctfst.o \
+	$(DEPS_PATH)/libjpeg/jidctint.o \
+	$(DEPS_PATH)/libjpeg/jidctred.o \
+	$(DEPS_PATH)/libjpeg/jfdctflt.o \
+	$(DEPS_PATH)/libjpeg/jfdctfst.o \
+	$(DEPS_PATH)/libjpeg/jfdctint.o \
+	$(DEPS_PATH)/libjpeg/jmemmgr.o \
+	$(DEPS_PATH)/libjpeg/jmemnobs.o \
+	$(DEPS_PATH)/libjpeg/jquant1.o \
+	$(DEPS_PATH)/libjpeg/jquant2.o \
+	$(DEPS_PATH)/libjpeg/jutils.o \
+	$(DEPS_PATH)/libjpeg/jsimd_none.o
+endif
+
+ifeq ($(USE_THEORADEC), 1)
+DEFINES += -DUSE_THEORADEC
+INCLUDES += -I$(DEPS_PATH)/theora/include
+OBJS_DEPS += $(DEPS_PATH)/theora/lib/bitpack.o \
+	$(DEPS_PATH)/theora/lib/decinfo.o \
+	$(DEPS_PATH)/theora/lib/decode.o \
+	$(DEPS_PATH)/theora/lib/dequant.o \
+	$(DEPS_PATH)/theora/lib/fragment.o \
+	$(DEPS_PATH)/theora/lib/huffdec.o \
+	$(DEPS_PATH)/theora/lib/idct.o \
+	$(DEPS_PATH)/theora/lib/info.o \
+	$(DEPS_PATH)/theora/lib/internal.o \
+	$(DEPS_PATH)/theora/lib/quant.o \
+	$(DEPS_PATH)/theora/lib/state.o
+else
+USE_THEORADEC =
+endif
+
+ifeq ($(USE_FREETYPE2), 1)
+DEFINES += -DUSE_FREETYPE2 -DFT2_BUILD_LIBRARY
+INCLUDES += -I$(DEPS_PATH)/freetype/include
+OBJS_DEPS += $(DEPS_PATH)/freetype/src/autofit/afangles.o \
+	$(DEPS_PATH)/freetype/src/autofit/afblue.o \
+	$(DEPS_PATH)/freetype/src/autofit/afcjk.o \
+	$(DEPS_PATH)/freetype/src/autofit/afdummy.o \
+	$(DEPS_PATH)/freetype/src/autofit/afglobal.o \
+	$(DEPS_PATH)/freetype/src/autofit/afhints.o \
+	$(DEPS_PATH)/freetype/src/autofit/afindic.o \
+	$(DEPS_PATH)/freetype/src/autofit/aflatin.o \
+	$(DEPS_PATH)/freetype/src/autofit/afloader.o \
+	$(DEPS_PATH)/freetype/src/autofit/afmodule.o \
+	$(DEPS_PATH)/freetype/src/autofit/afpic.o \
+	$(DEPS_PATH)/freetype/src/autofit/afranges.o \
+	$(DEPS_PATH)/freetype/src/autofit/afshaper.o \
+	$(DEPS_PATH)/freetype/src/autofit/afwarp.o \
+	$(DEPS_PATH)/freetype/src/base/basepic.o \
+	$(DEPS_PATH)/freetype/src/base/ftadvanc.o \
+	$(DEPS_PATH)/freetype/src/base/ftapi.o \
+	$(DEPS_PATH)/freetype/src/base/ftbitmap.o \
+	$(DEPS_PATH)/freetype/src/base/ftcalc.o \
+	$(DEPS_PATH)/freetype/src/base/ftgloadr.o \
+	$(DEPS_PATH)/freetype/src/base/ftglyph.o \
+	$(DEPS_PATH)/freetype/src/base/fthash.o \
+	$(DEPS_PATH)/freetype/src/base/ftinit.o \
+	$(DEPS_PATH)/freetype/src/base/ftsnames.o \
+	$(DEPS_PATH)/freetype/src/base/ftobjs.o \
+	$(DEPS_PATH)/freetype/src/base/ftsystem.o \
+	$(DEPS_PATH)/freetype/src/base/ftoutln.o \
+	$(DEPS_PATH)/freetype/src/base/ftrfork.o \
+	$(DEPS_PATH)/freetype/src/base/ftstream.o \
+	$(DEPS_PATH)/freetype/src/base/ftstroke.o \
+	$(DEPS_PATH)/freetype/src/base/fttrigon.o \
+	$(DEPS_PATH)/freetype/src/base/ftutil.o \
+	$(DEPS_PATH)/freetype/src/bdf/bdfdrivr.o \
+	$(DEPS_PATH)/freetype/src/bdf/bdflib.o \
+	$(DEPS_PATH)/freetype/src/cid/cidriver.o \
+	$(DEPS_PATH)/freetype/src/cid/cidgload.o \
+	$(DEPS_PATH)/freetype/src/cid/cidload.o \
+	$(DEPS_PATH)/freetype/src/cid/cidobjs.o \
+	$(DEPS_PATH)/freetype/src/cid/cidparse.o \
+	$(DEPS_PATH)/freetype/src/cff/cf2arrst.o \
+	$(DEPS_PATH)/freetype/src/cff/cf2blues.o \
+	$(DEPS_PATH)/freetype/src/cff/cf2error.o \
+	$(DEPS_PATH)/freetype/src/cff/cf2ft.o \
+	$(DEPS_PATH)/freetype/src/cff/cf2font.o \
+	$(DEPS_PATH)/freetype/src/cff/cf2hints.o \
+	$(DEPS_PATH)/freetype/src/cff/cf2intrp.o \
+	$(DEPS_PATH)/freetype/src/cff/cf2read.o \
+	$(DEPS_PATH)/freetype/src/cff/cf2stack.o \
+	$(DEPS_PATH)/freetype/src/cff/cffcmap.o \
+	$(DEPS_PATH)/freetype/src/cff/cffgload.o \
+	$(DEPS_PATH)/freetype/src/cff/cffload.o \
+	$(DEPS_PATH)/freetype/src/cff/cffobjs.o \
+	$(DEPS_PATH)/freetype/src/cff/cffparse.o \
+	$(DEPS_PATH)/freetype/src/cff/cffpic.o \
+	$(DEPS_PATH)/freetype/src/cff/cffdrivr.o \
+	$(DEPS_PATH)/freetype/src/gzip/ftgzip.o \
+	$(DEPS_PATH)/freetype/src/lzw/ftlzw.o \
+	$(DEPS_PATH)/freetype/src/pcf/pcfdrivr.o \
+	$(DEPS_PATH)/freetype/src/pcf/pcfread.o \
+	$(DEPS_PATH)/freetype/src/pcf/pcfutil.o \
+	$(DEPS_PATH)/freetype/src/pfr/pfrcmap.o \
+	$(DEPS_PATH)/freetype/src/pfr/pfrdrivr.o \
+	$(DEPS_PATH)/freetype/src/pfr/pfrgload.o \
+	$(DEPS_PATH)/freetype/src/pfr/pfrload.o \
+	$(DEPS_PATH)/freetype/src/pfr/pfrobjs.o \
+	$(DEPS_PATH)/freetype/src/pfr/pfrsbit.o \
+	$(DEPS_PATH)/freetype/src/psaux/afmparse.o \
+	$(DEPS_PATH)/freetype/src/psaux/psconv.o \
+	$(DEPS_PATH)/freetype/src/psaux/psobjs.o \
+	$(DEPS_PATH)/freetype/src/psaux/t1cmap.o \
+	$(DEPS_PATH)/freetype/src/psaux/t1decode.o \
+	$(DEPS_PATH)/freetype/src/psaux/psauxmod.o \
+	$(DEPS_PATH)/freetype/src/pshinter/pshalgo.o \
+	$(DEPS_PATH)/freetype/src/pshinter/pshglob.o \
+	$(DEPS_PATH)/freetype/src/pshinter/pshmod.o \
+	$(DEPS_PATH)/freetype/src/pshinter/pshpic.o \
+	$(DEPS_PATH)/freetype/src/pshinter/pshrec.o \
+	$(DEPS_PATH)/freetype/src/psnames/psmodule.o \
+	$(DEPS_PATH)/freetype/src/raster/ftrend1.o \
+	$(DEPS_PATH)/freetype/src/raster/ftraster.o \
+	$(DEPS_PATH)/freetype/src/raster/rastpic.o \
+	$(DEPS_PATH)/freetype/src/sfnt/sfdriver.o \
+	$(DEPS_PATH)/freetype/src/sfnt/sfntpic.o \
+	$(DEPS_PATH)/freetype/src/sfnt/sfobjs.o \
+	$(DEPS_PATH)/freetype/src/sfnt/ttbdf.o \
+	$(DEPS_PATH)/freetype/src/sfnt/ttcmap.o \
+	$(DEPS_PATH)/freetype/src/sfnt/ttkern.o \
+	$(DEPS_PATH)/freetype/src/sfnt/ttload.o \
+	$(DEPS_PATH)/freetype/src/sfnt/ttmtx.o \
+	$(DEPS_PATH)/freetype/src/sfnt/ttpost.o \
+	$(DEPS_PATH)/freetype/src/sfnt/ttsbit.o \
+	$(DEPS_PATH)/freetype/src/smooth/ftgrays.o \
+	$(DEPS_PATH)/freetype/src/smooth/ftsmooth.o \
+	$(DEPS_PATH)/freetype/src/type1/t1afm.o \
+	$(DEPS_PATH)/freetype/src/type1/t1driver.o \
+	$(DEPS_PATH)/freetype/src/type1/t1gload.o \
+	$(DEPS_PATH)/freetype/src/type1/t1load.o \
+	$(DEPS_PATH)/freetype/src/type1/t1objs.o \
+	$(DEPS_PATH)/freetype/src/type1/t1parse.o \
+	$(DEPS_PATH)/freetype/src/type42/t42drivr.o \
+	$(DEPS_PATH)/freetype/src/type42/t42objs.o \
+	$(DEPS_PATH)/freetype/src/type42/t42parse.o \
+	$(DEPS_PATH)/freetype/src/truetype/ttdriver.o \
+	$(DEPS_PATH)/freetype/src/truetype/ttgload.o \
+	$(DEPS_PATH)/freetype/src/truetype/ttgxvar.o \
+	$(DEPS_PATH)/freetype/src/truetype/ttinterp.o \
+	$(DEPS_PATH)/freetype/src/truetype/ttobjs.o \
+	$(DEPS_PATH)/freetype/src/truetype/ttpload.o \
+	$(DEPS_PATH)/freetype/src/winfonts/winfnt.o
+endif
+
+ifeq ($(USE_CLOUD), 1)
+ifeq ($(call is_lib_available,curl,<curl/curl.h>), yes)
+	LDFLAGS += -lcurl
+	USE_LIBCURL := 1
+	DEFINES += -DUSE_CLOUD -DUSE_LIBCURL
+else
+$(info System libcurl not available, dropping cloud feature.)
+endif
+endif
