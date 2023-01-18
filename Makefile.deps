@@ -1,6 +1,6 @@
 # Functions
-is_lib_available = $(if $(shell printf "\#include $(2)\nint main(){return 0;}" | $(CC) -xc -Wall -O -o /dev/null -l$(1) - > /dev/null 2>&1 && echo $$?),yes,no)
-
+HASH := \#
+is_lib_available = $(if $(shell printf '$(HASH)include $(2)\nint main(){return 0;}' | $(CC) -xc -Wall -O -o /dev/null -l$(1) - > /dev/null 2>&1 && echo $$?),yes,no)
 
 INCLUDES  += -I$(DEPS_PATH)
 
