@@ -36,12 +36,6 @@ bool retro_is_emu_thread_initialized(void);
  */
 void retro_join_emu_thread(void);
 
-/* Cancel the emulation thread.
- *
- * Only call this function from the main thread.
- */
-void retro_cancel_emu_thread(void);
-
 /* Returns true if the emulation thread has exited naturally.
  *
  * This function can be called from either the main or the emulation thread.

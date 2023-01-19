@@ -18,6 +18,8 @@ OBJS_DEPS += $(LIBRETRO_COMM_PATH)/libco/libco.o
 ifeq ($(platform), genode)
 OBJS_DEPS += $(LIBRETRO_COMM_PATH)/libco/genode.o
 endif
+else
+OBJS_DEPS += $(LIBRETRO_COMM_PATH)/rthreads/rthreads.o
 endif
 
 ifneq ($(STATIC_LINKING), 1)

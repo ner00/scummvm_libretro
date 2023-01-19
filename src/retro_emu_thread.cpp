@@ -1,30 +1,29 @@
 // This is copyrighted software. More information is at the end of this file.
+
 #include "retro_emu_thread.h"
 
-#include <pthread.h>
+#include <rthreads/rthreads.h>
 #include <stdio.h>
 
 #include "base/main.h"
 #include "os.h"
 
-static pthread_t main_thread;
-static pthread_t emu_thread;
-static pthread_mutex_t emu_mutex;
-static pthread_mutex_t main_mutex;
-static pthread_cond_t emu_cv;
-static pthread_cond_t main_cv;
+static uintptr_t main_thread_id;
+static sthread_t *emu_thread;
+static slock_t *emu_mutex;
+static slock_t *main_mutex;
+static scond_t *emu_cv;
+static scond_t *main_cv;
 static bool emu_keep_waiting = true;
 static bool main_keep_waiting = true;
 static bool emu_has_exited = false;
-static bool emu_thread_canceled = false;
 static bool emu_thread_initialized = false;
 
-static void *retro_run_emulator(void *args) {
+static void retro_run_emulator(void *args) {
   static const char *argv[20] = {0};
   unsigned i;
 
   emu_has_exited = false;
-  emu_thread_canceled = false;
 
   for (i = 0; i < cmd_params_num; i++)
     argv[i] = cmd_params[i];
@@ -34,47 +33,45 @@ static void *retro_run_emulator(void *args) {
 
   /* All done - switch back to the main
    * thread for the final time */
-  pthread_mutex_lock(&main_mutex);
+  slock_lock(main_mutex);
   main_keep_waiting = false;
-  pthread_mutex_unlock(&main_mutex);
+  slock_unlock(main_mutex);
 
-  pthread_mutex_lock(&emu_mutex);
-  pthread_cond_signal(&main_cv);
-  pthread_mutex_unlock(&emu_mutex);
-
-  return NULL;
+  slock_lock(emu_mutex);
+  scond_signal(main_cv);
+  slock_unlock(emu_mutex);
 }
 
 static void retro_switch_to_emu_thread() {
-  pthread_mutex_lock(&emu_mutex);
+  slock_lock(emu_mutex);
   emu_keep_waiting = false;
-  pthread_mutex_unlock(&emu_mutex);
-  pthread_mutex_lock(&main_mutex);
-  pthread_cond_signal(&emu_cv);
+  slock_unlock(emu_mutex);
+  slock_lock(main_mutex);
+  scond_signal(emu_cv);
 
   main_keep_waiting = true;
   while (main_keep_waiting) {
-    pthread_cond_wait(&main_cv, &main_mutex);
+    scond_wait(main_cv, main_mutex);
   }
-  pthread_mutex_unlock(&main_mutex);
+  slock_unlock(main_mutex);
 }
 
 static void retro_switch_to_main_thread() {
-  pthread_mutex_lock(&main_mutex);
+  slock_lock(main_mutex);
   main_keep_waiting = false;
-  pthread_mutex_unlock(&main_mutex);
-  pthread_mutex_lock(&emu_mutex);
-  pthread_cond_signal(&main_cv);
+  slock_unlock(main_mutex);
+  slock_lock(emu_mutex);
+  scond_signal(main_cv);
 
   emu_keep_waiting = true;
   while (emu_keep_waiting) {
-    pthread_cond_wait(&emu_cv, &emu_mutex);
+    scond_wait(emu_cv, emu_mutex);
   }
-  pthread_mutex_unlock(&emu_mutex);
+  slock_unlock(emu_mutex);
 }
 
 void retro_switch_thread() {
-  if (pthread_self() == main_thread)
+  if (sthread_get_current_thread_id() == main_thread_id)
     retro_switch_to_emu_thread();
   else
     retro_switch_to_main_thread();
@@ -84,29 +81,39 @@ bool retro_init_emu_thread(void) {
   if (emu_thread_initialized)
     return true;
 
-  main_thread = pthread_self();
-  if (pthread_mutex_init(&main_mutex, NULL))
+  main_thread_id = sthread_get_current_thread_id();
+
+  main_mutex = slock_new();
+  if (main_mutex == NULL)
     goto main_mutex_error;
-  if (pthread_mutex_init(&emu_mutex, NULL))
+
+  emu_mutex = slock_new();
+  if (emu_mutex == NULL)
     goto emu_mutex_error;
-  if (pthread_cond_init(&main_cv, NULL))
+
+  main_cv = scond_new();
+  if (main_cv == NULL)
     goto main_cv_error;
-  if (pthread_cond_init(&emu_cv, NULL))
+
+  emu_cv = scond_new();
+  if (emu_cv == NULL)
     goto emu_cv_error;
-  if (pthread_create(&emu_thread, NULL, retro_run_emulator, NULL))
+
+  emu_thread = sthread_create(retro_run_emulator, NULL);
+  if (emu_thread == NULL)
     goto emu_thread_error;
 
   emu_thread_initialized = true;
   return true;
 
 emu_thread_error:
-  pthread_cond_destroy(&emu_cv);
+  scond_free(emu_cv);
 emu_cv_error:
-  pthread_cond_destroy(&main_cv);
+  scond_free(main_cv);
 main_cv_error:
-  pthread_mutex_destroy(&emu_mutex);
+  slock_free(emu_mutex);
 emu_mutex_error:
-  pthread_mutex_destroy(&main_mutex);
+  slock_free(main_mutex);
 main_mutex_error:
   return false;
 }
@@ -115,10 +122,10 @@ void retro_deinit_emu_thread() {
   if (!emu_thread_initialized)
     return;
 
-  pthread_mutex_destroy(&main_mutex);
-  pthread_mutex_destroy(&emu_mutex);
-  pthread_cond_destroy(&main_cv);
-  pthread_cond_destroy(&emu_cv);
+  slock_free(main_mutex);
+  slock_free(emu_mutex);
+  scond_free(main_cv);
+  scond_free(emu_cv);
   emu_thread_initialized = false;
 }
 
@@ -129,16 +136,8 @@ void retro_join_emu_thread() {
   if (is_joined)
     return;
 
-  pthread_join(emu_thread, NULL);
+  sthread_join(emu_thread);
   is_joined = true;
-}
-
-void retro_cancel_emu_thread() {
-  if (emu_thread_canceled)
-    return;
-
-  pthread_cancel(emu_thread);
-  emu_thread_canceled = true;
 }
 
 bool retro_emu_thread_exited() { return emu_has_exited; }
